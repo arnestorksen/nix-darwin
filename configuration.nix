@@ -1,13 +1,13 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, ... }:
 
 {
   # System packages kept minimal - user packages go in home-manager
   environment.systemPackages = [ ];
 
   # Define user for Home Manager
-  users.users.ars = {
-    name = "ars";
-    home = "/Users/ars";
+  users.users.${username} = {
+    name = username;
+    home = "/Users/${username}";
   };
 
   # Set Git commit hash for darwin-rebuild

@@ -1,9 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should manage
-  home.username = "ars";
-  home.homeDirectory = "/Users/ars";
+  home.username = username;
+  home.homeDirectory = "/Users/${username}";
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -85,7 +85,7 @@
     enable = true;
     settings.user = {
     	name = "Arne Størksen";
-    	email = "arne.storksen@tv2.no";
+    	email = if username == "ars" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
     };
   };
 

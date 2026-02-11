@@ -13,6 +13,7 @@
     let
       # Helper function to create darwin configuration
       mkDarwinConfig = hostname: username: nix-darwin.lib.darwinSystem {
+        specialArgs = { inherit hostname username; };
         modules = [
           ./configuration.nix
           home-manager.darwinModules.home-manager
@@ -21,14 +22,17 @@
             home-manager.useUserPackages = false;
             home-manager.backupFileExtension = "backup";
             home-manager.users.${username} = import ./home.nix;
+            home-manager.extraSpecialArgs = { inherit hostname username; };
           }
         ];
       };
     in
     {
-      # Configuration for current Mac
+      # Configuration for work Mac
       darwinConfigurations."BGOMAC-ars" = mkDarwinConfig "BGOMAC-ars" "ars";
 
+      # Configuration for home Mac
+      darwinConfigurations."MacBookPro.storksen.home" = mkDarwinConfig "MacBookPro.storksen.home" "arne";
       # Add configurations for other machines here, for example:
       # darwinConfigurations."MacBook-Pro" = mkDarwinConfig "MacBook-Pro" "ars";
     };
