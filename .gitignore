@@ -1,0 +1,16 @@
+# Nix result symlinks
+result
+result-*
+
+# Backup files created by home-manager
+*.backup
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
