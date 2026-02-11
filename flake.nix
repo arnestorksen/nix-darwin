@@ -12,8 +12,8 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
     let
       # Helper function to create darwin configuration
-      mkDarwinConfig = hostname: username: nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit hostname username; };
+      mkDarwinConfig = hostname: username: platform: nix-darwin.lib.darwinSystem {
+        specialArgs = { inherit hostname username platform; };
         modules = [
           ./configuration.nix
           home-manager.darwinModules.home-manager
@@ -28,11 +28,11 @@
       };
     in
     {
-      # Configuration for work Mac
-      darwinConfigurations."BGOMAC-ars" = mkDarwinConfig "BGOMAC-ars" "ars";
+      # Configuration for work Mac (ARM)
+      darwinConfigurations."BGOMAC-ars" = mkDarwinConfig "BGOMAC-ars" "ars" "aarch64-darwin";
 
-      # Configuration for home Mac
-      darwinConfigurations."MacBookPro.storksen.home" = mkDarwinConfig "MacBookPro.storksen.home" "arne";
+      # Configuration for home Mac (Intel)
+      darwinConfigurations."arne-mac" = mkDarwinConfig "arne-mac" "arne" "x86_64-darwin";
       # Add configurations for other machines here, for example:
       # darwinConfigurations."MacBook-Pro" = mkDarwinConfig "MacBook-Pro" "ars";
     };

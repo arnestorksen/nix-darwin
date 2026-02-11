@@ -1,4 +1,4 @@
-{ config, pkgs, username, ... }:
+{ config, pkgs, username, platform, ... }:
 
 {
   # System packages kept minimal - user packages go in home-manager
@@ -18,7 +18,7 @@
   system.stateVersion = 5;
 
   # The platform the configuration will be used on.
-  nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.hostPlatform = platform;
 
   # Allow unfree packages (needed for Terraform and other tools)
   nixpkgs.config.allowUnfree = true;
