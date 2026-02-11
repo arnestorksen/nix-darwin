@@ -100,11 +100,24 @@ users.users.YOUR-USERNAME = {
 
 ### Step 4: First-Time Build
 
-Run the initial build (this will take a while):
+Run the initial build (this will take a while). Note: Recent versions of nix-darwin require running the initial activation as root.
 
 ```bash
-nix run nix-darwin -- switch --flake ~/.config/nix-darwin
+sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake '/Users/YOUR-USERNAME/.config/nix-darwin#YOUR-HOSTNAME'
 ```
+
+For example, if your hostname is "arne-mac" and username is "arne":
+
+```bash
+sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake '/Users/arne/.config/nix-darwin#arne-mac'
+```
+
+**Important notes:**
+- Use `sudo` for the initial installation (required for system activation)
+- Use absolute path, not `~` (tilde)
+- Quote the flake reference to prevent shell interpretation of `#`
+- Specify your configuration name after `#` (must match what you defined in flake.nix)
+- You'll see a warning about $HOME ownership - this is normal when using sudo
 
 This command:
 - Downloads nix-darwin
@@ -133,10 +146,16 @@ echo $SHELL
 
 ### Step 7: Future Updates
 
-From now on, use this command to rebuild:
+After the initial installation, you no longer need `sudo` for regular updates. Use this command to rebuild:
 
 ```bash
 darwin-rebuild switch --flake ~/.config/nix-darwin
+```
+
+Or specify the configuration explicitly:
+
+```bash
+darwin-rebuild switch --flake '~/.config/nix-darwin#arne-mac'
 ```
 
 ## What Gets Installed
@@ -188,9 +207,13 @@ git add .
 git commit -m "Update configuration"
 ```
 
-### Issue: Permission errors during build
+### Issue: "system activation must now be run as root"
 
-**Solution:** The first-time setup command may need sudo for system changes. It will prompt when needed.
+**Solution:** Recent versions of nix-darwin require sudo for the initial installation. Use:
+```bash
+sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake '/Users/YOUR-USERNAME/.config/nix-darwin#YOUR-HOSTNAME'
+```
+After the first successful installation, regular updates with `darwin-rebuild` don't need sudo.
 
 ### Issue: Different hostname on new machine
 
@@ -198,8 +221,9 @@ git commit -m "Update configuration"
 1. Add a new configuration in `flake.nix` for the new hostname, or
 2. Specify the configuration explicitly:
    ```bash
-   darwin-rebuild switch --flake ~/.config/nix-darwin#BGOMAC-ars
+   darwin-rebuild switch --flake '~/.config/nix-darwin#BGOMAC-ars'
    ```
+   Note: Quote the flake reference to prevent shell interpretation of `#`
 
 ## Tips for Multiple Machines
 
@@ -208,7 +232,7 @@ git commit -m "Update configuration"
 Use the same hostname-specific configuration by specifying it:
 
 ```bash
-darwin-rebuild switch --flake ~/.config/nix-darwin#BGOMAC-ars
+darwin-rebuild switch --flake '~/.config/nix-darwin#BGOMAC-ars'
 ```
 
 ### Option 2: Machine-Specific Configurations
