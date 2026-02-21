@@ -1,4 +1,4 @@
-{ config, pkgs, username, ... }:
+{ config, pkgs, username, hostname, machineType, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should manage
@@ -29,9 +29,6 @@
     coreutils
     antidote
 
-    # Cloud tools
-    awscli2
-
     # Container tools
     colima
     docker
@@ -42,7 +39,13 @@
     kustomize
     kubelogin
     kubectx  # includes kubens
-  ];
+  ] ++ (if machineType == "work" then [
+    # Work-specific packages
+    awscli2
+    amazon-ecr-credential-helper
+    (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
+    argocd
+  ] else []);
 
   # Let Home Manager install and manage itself
   programs.home-manager.enable = true;

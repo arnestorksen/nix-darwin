@@ -12,8 +12,8 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
     let
       # Helper function to create darwin configuration
-      mkDarwinConfig = hostname: username: platform: nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit hostname username platform; };
+      mkDarwinConfig = hostname: username: platform: machineType: nix-darwin.lib.darwinSystem {
+        specialArgs = { inherit hostname username platform machineType; };
         modules = [
           ./configuration.nix
           home-manager.darwinModules.home-manager
@@ -22,18 +22,18 @@
             home-manager.useUserPackages = false;
             home-manager.backupFileExtension = "backup";
             home-manager.users.${username} = import ./home.nix;
-            home-manager.extraSpecialArgs = { inherit hostname username; };
+            home-manager.extraSpecialArgs = { inherit hostname username machineType; };
           }
         ];
       };
     in
     {
       # Configuration for work Mac (ARM)
-      darwinConfigurations."BGOMAC-ars" = mkDarwinConfig "BGOMAC-ars" "ars" "aarch64-darwin";
+      darwinConfigurations."BGOMAC-ars" = mkDarwinConfig "BGOMAC-ars" "ars" "aarch64-darwin" "work";
 
       # Configuration for home Mac (Intel)
-      darwinConfigurations."arne-mac" = mkDarwinConfig "arne-mac" "arne" "x86_64-darwin";
+      darwinConfigurations."arne-mac" = mkDarwinConfig "arne-mac" "arne" "x86_64-darwin" "home";
       # Add configurations for other machines here, for example:
-      # darwinConfigurations."MacBook-Pro" = mkDarwinConfig "MacBook-Pro" "ars";
+      # darwinConfigurations."MacBook-Pro" = mkDarwinConfig "MacBook-Pro" "ars" "aarch64-darwin" "home";
     };
 }
