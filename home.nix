@@ -50,6 +50,9 @@
   # Let Home Manager install and manage itself
   programs.home-manager.enable = true;
 
+  # Extra PATH entries
+  home.sessionPath = [ "$HOME/.local/bin" ];
+
   # Shell configuration
   programs.zsh = {
     enable = true;
