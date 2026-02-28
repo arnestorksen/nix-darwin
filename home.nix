@@ -101,8 +101,8 @@
   programs.git = {
     enable = true;
     settings.user = {
-    	name = "Arne Størksen";
-    	email = if username == "ars" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
+      name = "Arne Mellesmo Størksen";
+      email = if username == "ars" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
     };
     signing = {
       key = "D923C0D7FA86BA69";
