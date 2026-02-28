@@ -34,6 +34,9 @@
     docker
     docker-compose
 
+    # Tools for running mpc servers
+    nodejs
+
     # Kubernetes tools
     kubectl
     kustomize
