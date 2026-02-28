@@ -89,12 +89,24 @@
     # zsh-users/zsh-syntax-highlighting
   '';
 
+  # GPG
+  programs.gpg.enable = true;
+
+  services.gpg-agent = {
+    enable = true;
+    pinentry.package = pkgs.pinentry_mac;
+  };
+
   # Git configuration (you can customize this later)
   programs.git = {
     enable = true;
     settings.user = {
     	name = "Arne Størksen";
     	email = if username == "ars" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
+    };
+    signing = {
+      key = "D923C0D7FA86BA69";
+      signByDefault = true;
     };
   };
 
