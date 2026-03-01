@@ -28,6 +28,7 @@
     gnugrep
     coreutils
     antidote
+    sops
 
     # Container tools
     colima
