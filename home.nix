@@ -1,4 +1,4 @@
-{ config, pkgs, username, hostname, machineType, ... }:
+{ config, lib, pkgs, username, hostname, machineType, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should manage
@@ -13,8 +13,6 @@
   # Packages that should be installed to the user profile
   home.packages = with pkgs; [
     # Version control
-    git
-    git-lfs
     gh  # GitHub CLI
 
     # Shell utilities
@@ -98,17 +96,47 @@
     pinentry.package = pkgs.pinentry_mac;
   };
 
-  # Git configuration (you can customize this later)
+  # Git configuration
   programs.git = {
     enable = true;
-    settings.user = {
-      name = "Arne Mellesmo Størksen";
-      email = if username == "ars" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
+    lfs.enable = true;
+
+    settings = {
+      user.name = "Arne Mellesmo Størksen";
+      user.email = if machineType == "work" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
+      user.signingKey = if machineType == "work"
+        then "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBqRo+OElcjXCy4JqZyE2gSDd1wUiDx+u5xs1XYLDAxt"
+        else "D923C0D7FA86BA69";
+      commit.gpgSign = true;
+      gpg.format = if machineType == "work" then "ssh" else "openpgp";
+      init.defaultBranch = "main";
+      core.editor = "nvim";
+      url."git@github.com:".insteadOf = "https://github.com/";
+    } // lib.optionalAttrs (machineType == "work") {
+      "gpg \"ssh\"" = {
+        program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+        allowedSignersFile = "${config.home.homeDirectory}/.ssh/allowed_signers";
+      };
     };
-    signing = {
-      key = "D923C0D7FA86BA69";
-      signByDefault = true;
-    };
+
+    includes = lib.optionals (machineType == "work") [
+      {
+        condition = "gitdir:~/code/private/";
+        contents = {
+          user.email = "arne.storksen@gmail.com";
+          user.signingKey = "D923C0D7FA86BA69";
+          gpg.format = "openpgp";
+        };
+      }
+      {
+        condition = "gitdir:~/.config/nix-darwin/";
+        contents = {
+          user.email = "arne.storksen@gmail.com";
+          user.signingKey = "D923C0D7FA86BA69";
+          gpg.format = "openpgp";
+        };
+      }
+    ];
   };
 
   # Starship prompt
