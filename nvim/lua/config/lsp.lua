@@ -11,11 +11,27 @@ vim.lsp.config.gopls = {
     gopls = {
       analyses = {
         unusedparams = true,
+        shadow = true,
+        useany = true,
       },
       staticcheck = true,
+      gofumpt = true,
     },
   },
 }
+
+-- Format and organize imports on save for Go files
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = '*.go',
+  callback = function()
+    vim.lsp.buf.format({ async = false })
+    -- Organize imports via gopls code action
+    vim.lsp.buf.code_action({
+      context = { only = { 'source.organizeImports' } },
+      apply = true,
+    })
+  end,
+})
 
 -- Terraform
 vim.lsp.config.terraformls = {
