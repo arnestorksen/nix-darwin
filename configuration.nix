@@ -25,4 +25,8 @@
 
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
+
+  # Linux builder (runs a NixOS VM for building Linux packages)
+  nix.linux-builder.enable = true;
+  nix.settings.trusted-users = [ "@admin" username ];
 }
