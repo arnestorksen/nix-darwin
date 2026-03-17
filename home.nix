@@ -15,6 +15,10 @@
     # Version control
     gh  # GitHub CLI
 
+    # Python
+    python3
+    uv
+
     # Shell utilities
     ripgrep
     watch
@@ -41,6 +45,8 @@
     kustomize
     kubelogin
     kubectx  # includes kubens
+    kubernetes-helm
+
   ] ++ (if machineType == "work" then [
     # Work-specific packages
     awscli2
@@ -70,6 +76,9 @@
       # Antidote plugin manager
       source ${pkgs.antidote}/share/antidote/antidote.zsh
       antidote load
+
+      # Secrets via 1Password
+      export GITHUB_PERSONAL_ACCESS_TOKEN=$(op read "op://Private/Github/PAT" 2>/dev/null)
     '';
   };
 
