@@ -53,6 +53,8 @@
     amazon-ecr-credential-helper
     (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
     argocd
+    cilium-cli
+    hubble
   ] else []);
 
   # Let Home Manager install and manage itself
@@ -77,13 +79,31 @@
       source ${pkgs.antidote}/share/antidote/antidote.zsh
       antidote load
 
-      # Secrets via 1Password
-      export GITHUB_PERSONAL_ACCESS_TOKEN=$(op read "op://Private/Github/PAT" 2>/dev/null)
+      # Secrets via macOS Keychain
+      export GITHUB_PERSONAL_ACCESS_TOKEN=$(security find-generic-password -a "$USER" -s "github-pat" -w 2>/dev/null)
     '';
   };
 
   programs.k9s = {
     enable = true;
+  };
+
+  # Sync secrets from 1Password to macOS Keychain at login
+  # To trigger manually: launchctl kickstart -k gui/$UID/sync-secrets
+  launchd.agents.sync-secrets = {
+    enable = true;
+    config = {
+      Label = "sync-secrets";
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        ''
+          PAT=$(/opt/homebrew/bin/op read "op://Private/Github/PAT" 2>/dev/null)
+          [ -n "$PAT" ] && /usr/bin/security add-generic-password -U -a "$USER" -s "github-pat" -w "$PAT"
+        ''
+      ];
+      RunAtLoad = true;
+    };
   };
 
   # Antidote plugins file
