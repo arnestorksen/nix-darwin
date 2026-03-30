@@ -79,7 +79,11 @@
 
       # Antidote plugin manager
       source ${pkgs.antidote}/share/antidote/antidote.zsh
-      antidote load
+      zsh_plugins=~/.zsh_plugins.zsh
+      if [[ ! -f $zsh_plugins || ~/.zsh_plugins.txt -nt $zsh_plugins ]]; then
+        antidote bundle < ~/.zsh_plugins.txt > $zsh_plugins
+      fi
+      source $zsh_plugins
 
       # Secrets via macOS Keychain
       export GITHUB_PERSONAL_ACCESS_TOKEN=$(security find-generic-password -a "$USER" -s "github-pat" -w 2>/dev/null)
