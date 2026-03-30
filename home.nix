@@ -46,6 +46,8 @@
     kubelogin
     kubectx  # includes kubens
     kubernetes-helm
+    kind
+    dapr-cli
 
   ] ++ (if machineType == "work" then [
     # Work-specific packages

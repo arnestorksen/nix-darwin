@@ -29,7 +29,7 @@
     in
     {
       # Configuration for work Mac (ARM)
-      darwinConfigurations."BGOMAC-ars" = mkDarwinConfig "BGOMAC-ars" "ars" "aarch64-darwin" "work";
+      darwinConfigurations."Mac-TM7WHWRD7G" = mkDarwinConfig "Mac-TM7WHWRD7G" "ars" "aarch64-darwin" "work";
 
       # Configuration for home Mac (Intel)
       darwinConfigurations."arne-mac" = mkDarwinConfig "arne-mac" "arne" "x86_64-darwin" "home";
