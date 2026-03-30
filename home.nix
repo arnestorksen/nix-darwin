@@ -29,7 +29,6 @@
     curl
     gnugrep
     coreutils
-    antidote
     sops
 
     # Container tools
@@ -70,20 +69,16 @@
     enable = true;
     enableCompletion = true;
 
-    # Add nix to PATH and setup antidote
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "git" "kubectl" ];
+    };
+
     initContent = ''
       # Nix
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
-
-      # Antidote plugin manager
-      source ${pkgs.antidote}/share/antidote/antidote.zsh
-      zsh_plugins=~/.zsh_plugins.zsh
-      if [[ ! -f $zsh_plugins || ~/.zsh_plugins.txt -nt $zsh_plugins ]]; then
-        antidote bundle < ~/.zsh_plugins.txt > $zsh_plugins
-      fi
-      source $zsh_plugins
 
       # Secrets via macOS Keychain
       export GITHUB_PERSONAL_ACCESS_TOKEN=$(security find-generic-password -a "$USER" -s "github-pat" -w 2>/dev/null)
@@ -112,16 +107,6 @@
     };
   };
 
-  # Antidote plugins file
-  home.file.".zsh_plugins.txt".text = ''
-    # oh-my-zsh plugins via antidote
-    ohmyzsh/ohmyzsh path:plugins/kubectl
-    ohmyzsh/ohmyzsh path:plugins/git
-
-    # You can add more plugins here, for example:
-    # zsh-users/zsh-autosuggestions
-    # zsh-users/zsh-syntax-highlighting
-  '';
 
   # GPG
   programs.gpg.enable = true;
