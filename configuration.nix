@@ -1,4 +1,4 @@
-{ config, pkgs, username, platform, ... }:
+{ config, lib, pkgs, username, platform, ... }:
 
 {
   # System packages kept minimal - user packages go in home-manager
@@ -28,5 +28,8 @@
 
   # Linux builder (runs a NixOS VM for building Linux packages)
   nix.linux-builder.enable = true;
+  nix.linux-builder.config = {
+    virtualisation.diskSize = lib.mkForce (50 * 1024);  # 50 GB
+  };
   nix.settings.trusted-users = [ "@admin" username ];
 }
