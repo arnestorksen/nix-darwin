@@ -120,6 +120,7 @@
   programs.git = {
     enable = true;
     lfs.enable = true;
+    signing.format = null;
 
     settings = {
       user.name = "Arne Mellesmo Størksen";
@@ -198,6 +199,8 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+    withRuby = false;
+    withPython3 = false;
 
     plugins = with pkgs.vimPlugins; [
       # Color scheme
@@ -263,7 +266,7 @@
       shellcheck
     ];
 
-    extraLuaConfig = ''
+    initLua = ''
       -- Load configuration modules
       require('config.settings')
       require('config.lsp')
