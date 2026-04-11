@@ -114,6 +114,21 @@ darwin-rebuild --list-generations
 darwin-rebuild switch --flake ~/.config/nix-darwin --rollback
 ```
 
+## Linux Builder (work machine only)
+
+A NixOS VM runs on the work machine for building Linux packages.
+
+```bash
+# Stop the VM
+sudo launchctl stop org.nixos.linux-builder
+
+# Start the VM
+sudo launchctl start org.nixos.linux-builder
+
+# SSH into the VM
+sudo ssh -i /etc/nix/builder_ed25519 builder@linux-builder
+```
+
 ## Useful Commands
 
 ```bash

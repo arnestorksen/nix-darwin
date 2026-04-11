@@ -1,4 +1,4 @@
-{ config, lib, pkgs, username, platform, ... }:
+{ config, lib, pkgs, username, platform, machineType, ... }:
 
 {
   # System packages kept minimal - user packages go in home-manager
@@ -27,8 +27,9 @@
   nix.settings.experimental-features = "nix-command flakes";
 
   # Linux builder (runs a NixOS VM for building Linux packages)
-  nix.linux-builder.enable = true;
-  nix.linux-builder.config = {
+  # Only enabled on work machine - to start/stop manually see README.md
+  nix.linux-builder.enable = machineType == "work";
+  nix.linux-builder.config = lib.mkIf (machineType == "work") {
     virtualisation.diskSize = lib.mkForce (50 * 1024);  # 50 GB
   };
   nix.settings.trusted-users = [ "@admin" username ];
