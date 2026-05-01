@@ -48,6 +48,9 @@
     kind
     dapr-cli
 
+    # Terminal
+    ghostty-bin
+
   ] ++ (if machineType == "work" then [
     # Work-specific packages
     awscli2
