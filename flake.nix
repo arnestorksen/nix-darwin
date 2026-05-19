@@ -7,10 +7,13 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    dokken-aws-helper.url = "git+ssh://git@github.com/tv2norge/dokken-aws-helper";
+    dokken-aws-helper.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, dokken-aws-helper }:
     let
+      lib = nixpkgs.lib;
       # Helper function to create darwin configuration
       mkDarwinConfig = hostname: username: platform: machineType: nix-darwin.lib.darwinSystem {
         specialArgs = { inherit hostname username platform machineType; };
@@ -22,7 +25,10 @@
             home-manager.useUserPackages = false;
             home-manager.backupFileExtension = "backup";
             home-manager.users.${username} = import ./home.nix;
-            home-manager.extraSpecialArgs = { inherit hostname username machineType; };
+            home-manager.extraSpecialArgs = { inherit hostname username machineType; }
+              // lib.optionalAttrs (machineType == "work") {
+                dokkenAwsHelper = dokken-aws-helper.packages.${platform}.default;
+              };
           }
         ];
       };

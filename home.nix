@@ -1,4 +1,4 @@
-{ config, lib, pkgs, username, hostname, machineType, ... }:
+{ config, lib, pkgs, username, hostname, machineType, dokkenAwsHelper ? null, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should manage
@@ -59,6 +59,7 @@
     argocd
     cilium-cli
     hubble
+    dokkenAwsHelper
   ] else []);
 
   # Let Home Manager install and manage itself
