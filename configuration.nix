@@ -1,4 +1,4 @@
-{ config, lib, pkgs, username, platform, machineType, ... }:
+{ config, lib, pkgs, username, platform, ... }:
 
 {
   # System packages kept minimal - user packages go in home-manager
@@ -26,11 +26,5 @@
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
 
-  # Linux builder (runs a NixOS VM for building Linux packages)
-  # Only enabled on work machine - to start/stop manually see README.md
-  nix.linux-builder.enable = machineType == "work";
-  nix.linux-builder.config = lib.mkIf (machineType == "work") {
-    virtualisation.diskSize = lib.mkForce (50 * 1024);  # 50 GB
-  };
   nix.settings.trusted-users = [ "@admin" username ];
 }

@@ -3,6 +3,7 @@
     "dokken-aws-helper": {
       "inputs": {
         "nixpkgs": [
+          "nix-work-env",
           "nixpkgs"
         ]
       },
@@ -60,6 +61,27 @@
         "type": "github"
       }
     },
+    "nix-work-env": {
+      "inputs": {
+        "dokken-aws-helper": "dokken-aws-helper",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781806887,
+        "narHash": "sha256-seqeNNzjpS1jemtzVJ35Qe8QEvxN7egqOz753sOGs2U=",
+        "ref": "refs/heads/main",
+        "rev": "d98b946645dfe084cabf544b3d827fbf3654c2b9",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/tv2norge/nix-dokken-dev"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/tv2norge/nix-dokken-dev"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1780930886,
@@ -78,9 +100,9 @@
     },
     "root": {
       "inputs": {
-        "dokken-aws-helper": "dokken-aws-helper",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
+        "nix-work-env": "nix-work-env",
         "nixpkgs": "nixpkgs"
       }
     }

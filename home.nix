@@ -1,4 +1,4 @@
-{ config, lib, pkgs, username, hostname, machineType, dokkenAwsHelper ? null, ... }:
+{ config, lib, pkgs, username, hostname, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should manage
@@ -12,9 +12,6 @@
 
   # Packages that should be installed to the user profile
   home.packages = with pkgs; [
-    # Version control
-    gh  # GitHub CLI
-
     # Python
     python3
     uv
@@ -24,44 +21,19 @@
     watch
     tree
     jq
-    yq-go
     wget
     curl
     gnugrep
     coreutils
-    sops
 
     # Container tools
     colima
     docker
     docker-compose
 
-    # Tools for running mpc servers
-    nodejs
-
-    # Kubernetes tools
-    kubectl
-    kustomize
-    kubelogin
-    kubectx  # includes kubens
-    kubernetes-helm
-    kind
-    dapr-cli
-
     # Terminal
     ghostty-bin
-
-  ] ++ (if machineType == "work" then [
-    # Work-specific packages
-    awscli2
-    azure-cli
-    amazon-ecr-credential-helper
-    (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
-    argocd
-    cilium-cli
-    hubble
-    dokkenAwsHelper
-  ] else []);
+  ];
 
   # Let Home Manager install and manage itself
   programs.home-manager.enable = true;
@@ -69,10 +41,18 @@
   # Extra PATH entries
   home.sessionPath = [ "$HOME/.local/bin" ];
 
+  home.sessionVariables = {
+    DOCKER_HOST = "unix:///Users/ars/.config/colima/default/docker.sock";
+    XDG_CONFIG_HOME = "$HOME/.config";
+  };
+
   # Shell configuration
   programs.zsh = {
     enable = true;
     enableCompletion = true;
+    profileExtra = ''
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    '';
 
     oh-my-zsh = {
       enable = true;
@@ -94,25 +74,6 @@
     enable = true;
   };
 
-  # Sync secrets from 1Password to macOS Keychain at login
-  # To trigger manually: launchctl kickstart -k gui/$UID/sync-secrets
-  launchd.agents.sync-secrets = {
-    enable = true;
-    config = {
-      Label = "sync-secrets";
-      ProgramArguments = [
-        "/bin/sh"
-        "-c"
-        ''
-          PAT=$(/opt/homebrew/bin/op read "op://Private/Github/PAT" 2>/dev/null)
-          [ -n "$PAT" ] && /usr/bin/security add-generic-password -U -a "$USER" -s "github-pat" -w "$PAT"
-        ''
-      ];
-      RunAtLoad = true;
-    };
-  };
-
-
   # GPG
   programs.gpg.enable = true;
 
@@ -121,62 +82,23 @@
     pinentry.package = pkgs.pinentry_mac;
   };
 
-  # Git configuration
+  # Git — shared settings only; identity is set per-machine in flake.nix
   programs.git = {
     enable = true;
     lfs.enable = true;
     signing.format = null;
 
     settings = {
-      user.name = "Arne Mellesmo Størksen";
-      user.email = if machineType == "work" then "arne.storksen@tv2.no" else "arne.storksen@gmail.com";
-      user.signingKey = if machineType == "work"
-        then "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBqRo+OElcjXCy4JqZyE2gSDd1wUiDx+u5xs1XYLDAxt"
-        else "D923C0D7FA86BA69";
-      commit.gpgSign = true;
-      gpg.format = if machineType == "work" then "ssh" else "openpgp";
       init.defaultBranch = "main";
       core.editor = "nvim";
-      url."git@github.com:".insteadOf = "https://github.com/";
-    } // lib.optionalAttrs (machineType == "work") {
-      "gpg \"ssh\"" = {
-        program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-        allowedSignersFile = "${config.home.homeDirectory}/.ssh/allowed_signers";
-      };
+      "url \"git@github.com:\"".insteadOf = "https://github.com/";
     };
-
-    includes = lib.optionals (machineType == "work") [
-      {
-        condition = "gitdir:~/code/private/";
-        contents = {
-          user.email = "arne.storksen@gmail.com";
-          user.signingKey = "D923C0D7FA86BA69";
-          gpg.format = "openpgp";
-        };
-      }
-      {
-        condition = "gitdir:~/.config/nix-darwin/";
-        contents = {
-          user.email = "arne.storksen@gmail.com";
-          user.signingKey = "D923C0D7FA86BA69";
-          gpg.format = "openpgp";
-        };
-      }
-    ];
   };
 
   # Starship prompt
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    # You can customize the configuration here later
-    # settings = {
-    #   add_newline = false;
-    #   character = {
-    #     success_symbol = "[➜](bold green)";
-    #     error_symbol = "[➜](bold red)";
-    #   };
-    # };
   };
 
   # Direnv integration
