@@ -7,18 +7,22 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nix-work-env.url = "git+ssh://git@github.com/tv2norge/nix-dokken-dev";
-    nix-work-env.inputs.nixpkgs.follows = "nixpkgs";
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+    nix-dokken-dev.url = "git+ssh://git@github.com/tv2norge/nix-dokken-dev";
+    nix-dokken-dev.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, nix-work-env }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, determinate, nix-dokken-dev }:
     {
       # Work Mac (ARM)
       darwinConfigurations."Mac-TM7WHWRD7G" = nix-darwin.lib.darwinSystem {
         specialArgs = { hostname = "Mac-TM7WHWRD7G"; username = "ars"; platform = "aarch64-darwin"; };
         modules = [
           ./configuration.nix
-          nix-work-env.darwinModules.work
+          determinate.darwinModules.default
+          ({ ... }: { determinateNix.enable = true; })
+          nix-dokken-dev.darwinModules.work
+          ({ ... }: { tv2.workEnv.enableLinuxBuilder = false; })
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -26,14 +30,14 @@
             home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = { hostname = "Mac-TM7WHWRD7G"; username = "ars"; };
             home-manager.users.ars = {
-              imports = [ ./home.nix nix-work-env.homeManagerModules.work ];
+              imports = [ ./home.nix nix-dokken-dev.homeManagerModules.work ];
               tv2.workEnv = {
                 enable = true;
                 workEmail = "arne.storksen@tv2.no";
                 gitUserName = "Arne Mellesmo Størksen";
                 sshSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBqRo+OElcjXCy4JqZyE2gSDd1wUiDx+u5xs1XYLDAxt";
                 enable1PasswordSigning = true;
-                dokkenAwsHelperPackage = nix-work-env.packages.aarch64-darwin.dokken-aws-helper;
+                dokkenAwsHelperPackage = nix-dokken-dev.packages.aarch64-darwin.dokken-aws-helper;
                 personalEmail = "arne.storksen@gmail.com";
                 personalSigningKey = "D923C0D7FA86BA69";
                 personalRepoDirs = [ "~/code/private/" "~/.config/nix-darwin/" ];
