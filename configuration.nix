@@ -23,8 +23,5 @@
   # Allow unfree packages (needed for Terraform and other tools)
   nixpkgs.config.allowUnfree = true;
 
-  # Necessary for using flakes on this system.
-  nix.settings.experimental-features = "nix-command flakes";
-
   nix.settings.trusted-users = [ "@admin" username ];
 }
