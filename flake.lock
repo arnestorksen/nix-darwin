@@ -210,11 +210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781814769,
-        "narHash": "sha256-JDJGDzDPBk//sTyViqrpYyZQuAlVaQOSDDQ9pioLF30=",
+        "lastModified": 1782307173,
+        "narHash": "sha256-9KnQlSXZU5hFfvr1U8x3hvoco1SZI24Uy4CHgw+kJQM=",
         "ref": "refs/heads/main",
-        "rev": "a6c31634ba91fafbab46e60745fe8e1eb6401a52",
-        "revCount": 6,
+        "rev": "311f8d8b594cab6ab0cb4564b25713583c27cae5",
+        "revCount": 10,
         "type": "git",
         "url": "ssh://git@github.com/tv2norge/nix-dokken-dev"
       },
