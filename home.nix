@@ -16,6 +16,9 @@
     python3
     uv
 
+    # Fonts
+    nerd-fonts.fira-code
+
     # Shell utilities
     ripgrep
     watch
@@ -31,8 +34,6 @@
     docker
     docker-compose
 
-    # Terminal
-    ghostty-bin
   ];
 
   # Let Home Manager install and manage itself
@@ -52,13 +53,22 @@
     enableCompletion = true;
     profileExtra = ''
       eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      # oh-my-zsh's kubectl plugin needs this set (and existing) before it's sourced
+      export ZSH_CACHE_DIR="$HOME/.cache/zsh"
+      mkdir -p "$ZSH_CACHE_DIR/completions"
     '';
 
-    oh-my-zsh = {
-      enable = true;
-      plugins = [ "git" "kubectl" ];
-    };
-
+    plugins = [
+      {
+        name = pkgs.zsh-nix-shell.pname;
+        src = pkgs.zsh-nix-shell.src;
+      }
+      {
+        name = "kubectl";
+        src = "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/kubectl";
+      }
+    ];
     initContent = ''
       # Nix
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
@@ -67,7 +77,25 @@
 
       # Secrets via macOS Keychain
       export GITHUB_PERSONAL_ACCESS_TOKEN=$(security find-generic-password -a "$USER" -s "github-pat" -w 2>/dev/null)
+
+      bindkey -v
     '';
+  };
+
+  programs.ghostty = {
+    enable = true;
+    package = pkgs.ghostty-bin;
+    settings = {
+      font-family = "FiraCode Nerd Font Mono";
+      font-size = 22;
+      background = "#0d0f16";
+      window-padding-x = 8;
+      window-padding-y = 8;
+      scrollback-limit = 10000;
+      mouse-hide-while-typing = true;
+      keybind = "global:cmd+shift+y=toggle_quick_terminal";
+      copy-on-select = "clipboard";
+    };
   };
 
   programs.k9s = {
