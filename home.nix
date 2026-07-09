@@ -60,10 +60,10 @@
     '';
 
     plugins = [
-      {
-        name = pkgs.zsh-nix-shell.pname;
-        src = pkgs.zsh-nix-shell.src;
-      }
+#      {
+#        name = pkgs.zsh-nix-shell.pname;
+#        src = pkgs.zsh-nix-shell.src;
+#      }
       {
         name = "kubectl";
         src = "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/kubectl";
@@ -199,6 +199,7 @@
 
       # Git integration
       gitsigns-nvim
+      diffview-nvim
 
       # Quality of life
       comment-nvim
