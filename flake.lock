@@ -210,11 +210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785745810,
-        "narHash": "sha256-shSFDxDVCLwqRjcfJIL4UtfhysYoZLwPOQXpw4SaccU=",
+        "lastModified": 1785746064,
+        "narHash": "sha256-BeO8Jx52nIwkUFn3EA7g5zI3f0zGWU9u/I8qqP1gOsc=",
         "ref": "refs/heads/main",
-        "rev": "ff603251f174c4e93376931914372d2ba5704fc6",
-        "revCount": 13,
+        "rev": "baa9d052d81fbb0591c0ac083c6ebfa51c10cd20",
+        "revCount": 14,
         "type": "git",
         "url": "file:///Users/ars/code/nix-work-env"
       },
