@@ -155,6 +155,19 @@ darwin-rebuild switch --flake ~/.config/nix-darwin --rollback
 
 ## Troubleshooting
 
+### Uninstalling Nix
+
+> **Always run uninstall commands from the stock macOS Terminal.app — never from Ghostty or any
+> other terminal/shell installed via Nix.**
+
+Ghostty (`programs.ghostty` in `home.nix`) and the active zsh profile are both Nix-store-managed
+on these machines. If Nix is uninstalled while running inside a Nix-installed terminal, the
+terminal binary and/or shell profile scripts you're actively running from can disappear or break
+mid-operation, potentially leaving you with no working shell to finish or recover from a partial
+uninstall. Terminal.app and its default shell aren't Nix-managed, so they keep working regardless
+of what happens to `/nix` — always uninstall from there instead. This applies to any uninstaller:
+`nix run nix-darwin -- uninstall`, `/nix/nix-installer uninstall`, Determinate's uninstaller, etc.
+
 ### "No such file or directory: darwin-rebuild"
 
 Restart your terminal after first installation, or run
