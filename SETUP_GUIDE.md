@@ -1,288 +1,148 @@
-# Complete Nix Darwin Setup Recipe
+# Fresh-Machine Bootstrap Runbook
 
-A step-by-step guide to set up this exact configuration on a new Mac.
+Step-by-step recipe for bringing up one of this repo's two known machines
+(`Mac-TM7WHWRD7G` / work, `arne-mac` / home) from a blank macOS install. This is
+specific to those two machines — general nix-darwin/home-manager/`nix-dokken-dev`
+concepts and options are documented in `nix-dokken-dev`'s own README, not here.
+If you're setting up a genuinely new (third) machine, read
+[README.md](./README.md#the-two-machines) first and add a new
+`darwinConfigurations` block modeled on whichever of the two is the closer match.
 
-## Prerequisites
-
-- macOS (tested on Apple Silicon)
-- Terminal access
-- Internet connection
-
-## Step-by-Step Installation
-
-### Step 1: Install Nix (Choose One Method)
-
-#### Option A: Determinate Nix Installer (Recommended)
-
-This installer is cleaner and easier to uninstall:
+## Step 1: Install Nix
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-#### Option B: Official Nix Installer
+Restart your terminal, then verify: `nix --version`.
 
-The traditional method:
+You'll likely see `WARN ... SelfTest ShellFailed` for `sh`/`bash` — this is a
+known, harmless quirk: Determinate's installer only wires "use Nix in
+non-interactive shells" into zsh, which is what both machines use as the login
+shell anyway.
 
-```bash
-sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
-```
+You may also see an `INFO` line suggesting Determinate's `.pkg`-based graphical
+installer instead. We're intentionally using the shell script — see
+[README.md](./README.md#installer-determinate-nix) for why.
 
-**After installation:**
-1. Close your terminal completely
-2. Open a new terminal window
-3. Verify installation: `nix --version`
-
-### Step 2: Clone Configuration
+## Step 2: Clone This Repository
 
 ```bash
-# Create config directory
 mkdir -p ~/.config
-
-# Clone this repository
-git clone https://github.com/YOUR_USERNAME/nix-darwin.git ~/.config/nix-darwin
-
-# Navigate to the directory
+git clone git@github.com:arnestorksen/nix-darwin.git ~/.config/nix-darwin
 cd ~/.config/nix-darwin
 ```
 
-### Step 3: Customize Configuration
+## Step 3: Machine-Specific Prerequisites
 
-#### 3a. Find Your Hostname
+### Work Mac (`Mac-TM7WHWRD7G`) only
 
-```bash
-hostname
-```
+1. **1Password SSH Agent**: enable it in 1Password → Settings → Developer →
+   SSH Agent, and confirm you're signed into the correct 1Password
+   account/vault (the one containing `SSH Key (TV 2 - git)` in the `Private`
+   vault). This is easy to get wrong silently: if you're in the wrong vault,
+   `ssh-add -l` against 1Password's agent just reports "no identities" with no
+   error pointing at the cause, even though the socket, config, and toggle all
+   look correct.
 
-#### 3b. Edit flake.nix
-
-Open `flake.nix` and add/update your machine's configuration:
-
-```nix
-darwinConfigurations."YOUR-HOSTNAME" = mkDarwinConfig "YOUR-HOSTNAME" "YOUR-USERNAME";
-```
-
-For example, if your hostname is "MacBook-Pro" and username is "john":
-
-```nix
-darwinConfigurations."MacBook-Pro" = mkDarwinConfig "MacBook-Pro" "john";
-```
-
-#### 3c. Edit home.nix
-
-Update these values:
-
-```nix
-home.username = "YOUR-USERNAME";
-home.homeDirectory = "/Users/YOUR-USERNAME";
-```
-
-And your git configuration:
-
-```nix
-programs.git = {
-  enable = true;
-  userName = "Your Name";
-  userEmail = "your.email@example.com";
-};
-```
-
-#### 3d. Edit configuration.nix (if needed)
-
-Update the user definition:
-
-```nix
-users.users.YOUR-USERNAME = {
-  name = "YOUR-USERNAME";
-  home = "/Users/YOUR-USERNAME";
-};
-```
-
-### Step 4: First-Time Build
-
-Run the initial build (this will take a while). Note: Recent versions of nix-darwin require running the initial activation as root.
-
-```bash
-sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake '/Users/YOUR-USERNAME/.config/nix-darwin#YOUR-HOSTNAME'
-```
-
-For example, if your hostname is "arne-mac" and username is "arne":
-
-```bash
-sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake '/Users/arne/.config/nix-darwin#arne-mac'
-```
-
-**Important notes:**
-- Use `sudo` for the initial installation (required for system activation)
-- Use absolute path, not `~` (tilde)
-- Quote the flake reference to prevent shell interpretation of `#`
-- Specify your configuration name after `#` (must match what you defined in flake.nix)
-- You'll see a warning about $HOME ownership - this is normal when using sudo
-
-This command:
-- Downloads nix-darwin
-- Builds your system configuration
-- Sets up system profiles
-- Activates the configuration
-
-### Step 5: Restart Your Terminal
-
-Close and reopen your terminal to load the new shell configuration.
-
-### Step 6: Verify Installation
-
-Check that everything is working:
-
-```bash
-# Check Darwin rebuild is available
-which darwin-rebuild
-
-# Check installed packages
-which starship git gh kubectl docker
-
-# Check zsh configuration
-echo $SHELL
-```
-
-### Step 7: Future Updates
-
-After the initial installation, you no longer need `sudo` for regular updates. Use this command to rebuild:
-
-```bash
-darwin-rebuild switch --flake ~/.config/nix-darwin
-```
-
-Or specify the configuration explicitly:
-
-```bash
-darwin-rebuild switch --flake '~/.config/nix-darwin#arne-mac'
-```
-
-## What Gets Installed
-
-### System Configuration
-- Nix with flakes enabled
-- Unfree packages allowed (for tools like Terraform)
-
-### Shell & Terminal
-- Zsh as default shell
-- Starship prompt
-- Antidote plugin manager
-- Direnv for project environments
-- FZF for fuzzy finding
-
-### Development Tools
-- Git + Git LFS + GitHub CLI
-- Neovim with full IDE setup
-  - LSP support (Go, Terraform, YAML, Bash)
-  - Treesitter syntax highlighting
-  - Telescope fuzzy finder
-  - File explorer and more
-
-### DevOps Tools
-- Docker + Docker Compose + Colima
-- Kubernetes: kubectl, kustomize, kubelogin, kubectx, k9s
-- Terraform + Terraform LSP
-- AWS CLI
-
-### Utilities
-- ripgrep, tree, jq, yq
-- wget, curl
-- GNU grep and coreutils
-
-## Common Issues & Solutions
-
-### Issue: "darwin-rebuild: command not found"
-
-**Solution:** Restart your terminal or source your profile:
-```bash
-source ~/.zshrc
-```
-
-### Issue: "error: getting status of '/nix/store/...': No such file or directory"
-
-**Solution:** Your git repository has untracked files. Flakes only see committed files:
-```bash
-git add .
-git commit -m "Update configuration"
-```
-
-### Issue: "system activation must now be run as root"
-
-**Solution:** Recent versions of nix-darwin require sudo for the initial installation. Use:
-```bash
-sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake '/Users/YOUR-USERNAME/.config/nix-darwin#YOUR-HOSTNAME'
-```
-After the first successful installation, regular updates with `darwin-rebuild` don't need sudo.
-
-### Issue: Different hostname on new machine
-
-**Solution:** Either:
-1. Add a new configuration in `flake.nix` for the new hostname, or
-2. Specify the configuration explicitly:
+   Verify:
    ```bash
-   darwin-rebuild switch --flake '~/.config/nix-darwin#BGOMAC-ars'
+   SSH_AUTH_SOCK=~/.1password/agent.sock ssh-add -l
+   SSH_AUTH_SOCK=~/.1password/agent.sock ssh -T git@github.com
    ```
-   Note: Quote the flake reference to prevent shell interpretation of `#`
+   The second command should greet you by GitHub username.
 
-## Tips for Multiple Machines
+2. **FlakeHub sign-in** (for the native Linux builder):
+   ```bash
+   determinate-nixd auth login
+   ```
 
-### Option 1: Same Configuration Everywhere
+3. Confirm `~/code/nix-work-env` (the local `nix-dokken-dev` checkout
+   `flake.nix` currently points at) exists on this machine, since the input
+   isn't pointed at the pushed GitHub repo yet.
 
-Use the same hostname-specific configuration by specifying it:
+### Home Mac (`arne-mac`)
+
+No prerequisites — no private inputs, no 1Password SSH agent dependency.
+
+## Step 4: First-Time Build + Activate
+
+### Home Mac — plain path
 
 ```bash
-darwin-rebuild switch --flake '~/.config/nix-darwin#BGOMAC-ars'
+sudo nix run nix-darwin -- switch --flake ~/.config/nix-darwin#arne-mac
 ```
 
-### Option 2: Machine-Specific Configurations
+### Work Mac — private-input-safe path
 
-Add different configurations for each machine in `flake.nix`:
+The plain command above will fail here: `root` (under `sudo`) has no SSH agent
+to fetch the private `git+ssh://` `nix-dokken-dev` input. Build as your user
+first (SSH agent available), then activate the already-built result as root:
 
-```nix
-darwinConfigurations = {
-  "work-laptop" = mkDarwinConfig "work-laptop" "ars";
-  "personal-mac" = mkDarwinConfig "personal-mac" "ars";
-};
+```bash
+nix build ~/.config/nix-darwin#darwinConfigurations.Mac-TM7WHWRD7G.system -o /tmp/nix-darwin-system
+sudo mv /etc/nix/nix.custom.conf /etc/nix/nix.custom.conf.before-nix-darwin   # only if it exists
+sudo /tmp/nix-darwin-system/sw/bin/darwin-rebuild activate
 ```
 
-Then create separate home.nix files:
-- `home-work.nix`
-- `home-personal.nix`
+**Known gotcha — `home-manager.backupFileExtension` collision:** if this
+machine has been set up with this config before (e.g. a previous nix install
+that got wiped), activation can fail partway with something like:
 
-### Option 3: Shared Base + Machine-Specific Overrides
+```
+Existing file '/Users/ars/.zshrc.backup' would be clobbered by backing up '/Users/ars/.zshrc'
+```
 
-Create a `common.nix` with shared config, then import and override per machine.
+This happens when a `.backup` file from a *previous* activation already
+occupies the path home-manager wants to write the *current* file's backup to.
+Check whether the live file is worth preserving (it may just be a throwaway
+default file recreated since the last wipe) and whether the existing
+`.backup` is the one with real history — then rename the old `.backup` aside
+(e.g. `mv ~/.zshrc.backup ~/.zshrc.backup.$(date +%F)`) rather than deleting
+either, and retry activation. Repeat for any other conflicting path it reports
+(it stops at the first one found).
+
+## Step 5: Restart Your Terminal
+
+## Step 6: Verify
+
+```bash
+which darwin-rebuild starship git nvim
+echo $SHELL
+
+# Work Mac only:
+which nix-rebuild dokken-aws-helper   # nix-rebuild is a shell function, not a binary — use `type nix-rebuild`
+cat ~/.ssh/allowed_signers            # should already list your signing key
+```
+
+### Verify commit signing (work Mac)
+
+```bash
+cd ~/code/some-work-repo
+git commit --allow-empty -m "test signing"
+git log --show-signature -1
+```
+
+## Step 7: Future Updates
+
+- Work Mac: `nix-rebuild` (handles the build-as-user/activate-as-root split automatically)
+- Home Mac: `darwin-rebuild switch --flake ~/.config/nix-darwin#arne-mac`
 
 ## Maintenance
 
-### Update all dependencies:
 ```bash
 cd ~/.config/nix-darwin
 nix flake update
-darwin-rebuild switch --flake .
-```
+# then rebuild as in Step 7
 
-### Clean up old generations:
-```bash
-nix-collect-garbage -d
-```
-
-### See what changed:
-```bash
+nix-collect-garbage -d       # clean up old generations
 darwin-rebuild --list-generations
 ```
 
-## Next Steps
-
-1. Customize package list in `home.nix`
-2. Tweak Neovim configuration in `nvim/lua/config/`
-3. Add more Zsh plugins in the `.zsh_plugins.txt` section
-4. Configure Starship prompt in `home.nix`
-
 ## Getting Help
 
-- Check the [README.md](./README.md) for daily usage
-- Browse [Nix Darwin docs](https://github.com/LnL7/nix-darwin)
-- Search packages at [search.nixos.org](https://search.nixos.org)
-- Join the [NixOS Discourse](https://discourse.nixos.org)
+- General nix-darwin/home-manager/`nix-dokken-dev` concepts, module options,
+  Linux builder / sandbox VM setup: see
+  [nix-dokken-dev](https://github.com/tv2norge/nix-dokken-dev)'s README
+- [Nix Darwin docs](https://github.com/LnL7/nix-darwin)
+- [search.nixos.org](https://search.nixos.org)

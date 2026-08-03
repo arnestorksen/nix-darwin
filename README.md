@@ -1,82 +1,105 @@
 # Nix Darwin Configuration
 
-My declarative macOS system configuration using nix-darwin and home-manager.
+Arne's declarative macOS system configuration using nix-darwin and home-manager,
+covering two specific machines. This doc (and `SETUP_GUIDE.md` /
+`GITHUB_SETUP.md`) documents *this* installation only — what's installed, the
+choices made, and why. General, reusable nix-darwin/home-manager knowledge
+(what Nix is, module options, generic setup steps) belongs in the
+`nix-dokken-dev` module's own README, not here — see
+[Work Mac specifics](#work-mac-mac-tm7whwrd7g-specifics) below for where that
+lives.
 
-## Features
+## The two machines
 
-- **Declarative package management** - All packages defined in code
-- **Home Manager** - User environment and dotfiles
-- **Neovim** - Fully configured with LSP, Treesitter, and plugins
-- **Shell setup** - Zsh with starship prompt, fzf, direnv
-- **Development tools** - Go, Terraform, Kubernetes, Docker, and more
+| | Work Mac | Home Mac |
+|---|---|---|
+| Hostname | `Mac-TM7WHWRD7G` | `arne-mac` |
+| Username | `ars` | `arne` |
+| Platform | `aarch64-darwin` | `x86_64-darwin` |
+| Private inputs | `nix-dokken-dev` (TV2-internal) | none |
+| Git identity | `tv2.workEnv.*` (work email + SSH signing) | `programs.git.settings` (personal GPG signing) |
 
-## Quick Start on New Mac
+Both are defined as separate, fully hand-written `darwinConfigurations` blocks
+in `flake.nix` — there's no shared "template" helper function. `home.nix` and
+`configuration.nix` are shared and machine-independent; everything
+machine-specific (hostname, username, platform, git identity) is set per-block
+via `specialArgs` and inline home-manager config in `flake.nix`.
 
-### 1. Install Nix
+## Installer: Determinate Nix
 
-Using the Determinate Nix Installer (recommended):
+Both machines install Nix via the Determinate Nix Installer:
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-Or using the official installer:
+**Why Determinate:** it handles macOS-specific install quirks (the encrypted
+APFS `Nix Store` volume, SIP, daemon/launchd setup) more robustly than the
+plain nixos.org installer, enables flakes by default, and it's what the
+`nix-dokken-dev` module's own README documents as the supported path for the
+work Mac. (Determinate also ships a `.pkg`-based graphical installer with a
+menu-bar update manager — we stuck with the shell script since that's the
+proven/documented path for this setup, not because the `.pkg` is wrong.)
+
+## Work Mac (`Mac-TM7WHWRD7G`) specifics
+
+This machine pulls in a private TV2 module,
+[`nix-dokken-dev`](https://github.com/tv2norge/nix-dokken-dev) (source at
+`~/code/nix-work-env`, also authored by Arne) — **that module's own README is
+the source of truth** for what it provides, its full options reference, and
+generic setup instructions. What follows here is only the reasoning behind how
+*this* repo wires it in.
+
+- **`determinate.darwinModules.default` + `determinateNix.enable = true`** are
+  enabled, so nix-darwin manages/tracks the Determinate Nix installation
+  declaratively, matching `nix-dokken-dev`'s documented "Option A" setup.
+- **`tv2.workEnv.enableLinuxBuilder = false`.** The Linux builder runs via
+  Determinate's native Virtualization.framework-based builder, not
+  nix-darwin's own QEMU-based `nix.linux-builder`. This is a real constraint,
+  not a style choice: nix-darwin's `nix.linux-builder.enable` **requires**
+  `nix.enable = true`, but the `determinate` module sets `nix.enable = false`
+  (Determinate manages the daemon instead) — so QEMU-based `nix.linux-builder`
+  and `determinateNix.enable` cannot both be on. We have FlakeHub early access
+  to the native builder, so we use that and keep `enableLinuxBuilder = false`.
+  If that access is ever lost, flip it back to `true` and drop the
+  `determinate` module/input instead.
+- **`nix-dokken-dev.url`** is temporarily pointed at a local checkout
+  (`git+file:///Users/ars/code/nix-work-env`) instead of
+  `git+ssh://git@github.com/tv2norge/nix-dokken-dev`, to test the sandbox VM
+  work before that repo is pushed. Switch it back once it is.
+- **First-time bootstrap needs a non-default procedure**, because
+  `nix-dokken-dev` is a private `git+ssh://` input and `root` (under `sudo`)
+  has no SSH agent to fetch it:
+  ```bash
+  nix build ~/.config/nix-darwin#darwinConfigurations.Mac-TM7WHWRD7G.system -o /tmp/nix-darwin-system
+  sudo mv /etc/nix/nix.custom.conf /etc/nix/nix.custom.conf.before-nix-darwin   # if present
+  sudo /tmp/nix-darwin-system/sw/bin/darwin-rebuild activate
+  ```
+  After the first activation, use `nix-rebuild` (a shell function
+  `nix-dokken-dev` installs into the shell) for all subsequent changes — it
+  does the same build-as-user/activate-as-root split automatically.
+- **Commit signing depends on 1Password's SSH Agent** (Settings → Developer →
+  SSH Agent) being enabled, **and on being signed into the right 1Password
+  account/vault** — the agent silently reports "no identities" if you're in
+  the wrong vault, with nothing pointing at why. `~/.ssh/allowed_signers` and
+  `~/.config/1Password/ssh/agent.toml` (referencing the `SSH Key (TV 2 - git)`
+  item in the `Private` vault) are already set correctly; the vault sign-in is
+  the part that can silently break.
+- **`home-manager.backupFileExtension = "backup"`** means a reinstall (like
+  this one) can collide with a `.backup` file from a *previous* install if one
+  already exists at that path (e.g. `~/.zshrc.backup` from an earlier
+  generation). Rename the old `.backup` aside (e.g. add a date suffix) rather
+  than deleting it, then re-run activation.
+
+## Home Mac (`arne-mac`) specifics
+
+No private inputs, no `tv2.workEnv` — just nix-darwin + home-manager, with git
+identity set inline via `programs.git.settings` in its `flake.nix` block
+(personal GPG signing, not SSH/1Password). First-time bootstrap is the plain
+path, no special procedure needed:
 
 ```bash
-sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
-```
-
-**Important:** Restart your terminal after installation.
-
-### 2. Clone This Repository
-
-```bash
-mkdir -p ~/.config
-git clone https://github.com/YOUR_USERNAME/nix-darwin.git ~/.config/nix-darwin
-cd ~/.config/nix-darwin
-```
-
-### 3. Customize for Your Machine
-
-Edit `flake.nix` and update:
-- The hostname (run `hostname` to find yours)
-- Your username if different from "ars"
-
-Edit `home.nix` and update:
-- `home.username` (line 5)
-- `home.homeDirectory` (line 6)
-- Git name and email (lines 87-88)
-
-### 4. Build and Apply Configuration
-
-First time setup (creates system profile):
-
-```bash
-nix run nix-darwin -- switch --flake ~/.config/nix-darwin
-```
-
-After the first time, use:
-
-```bash
-darwin-rebuild switch --flake ~/.config/nix-darwin
-```
-
-### 5. Restart Terminal
-
-Your new configuration is now active!
-
-## File Structure
-
-```
-.
-├── flake.nix           # Flake inputs and outputs
-├── flake.lock          # Locked dependency versions
-├── configuration.nix   # System-level configuration
-├── home.nix           # User packages and programs
-├── nvim/              # Neovim configuration
-│   └── lua/
-│       └── config/    # Lua configuration modules
-└── README.md          # This file
+sudo nix run nix-darwin -- switch --flake ~/.config/nix-darwin#arne-mac
 ```
 
 ## Daily Usage
@@ -85,13 +108,12 @@ Your new configuration is now active!
 
 1. Edit configuration files
 2. Apply changes:
-   ```bash
-   darwin-rebuild switch --flake ~/.config/nix-darwin
-   ```
+   - Work Mac: `nix-rebuild` (provided by `nix-dokken-dev`)
+   - Home Mac: `darwin-rebuild switch --flake ~/.config/nix-darwin#arne-mac`
 
 ### Adding Packages
 
-Add to `home.packages` in `home.nix`:
+Add to `home.packages` in `home.nix` (shared by both machines):
 
 ```nix
 home.packages = with pkgs; [
@@ -104,8 +126,8 @@ home.packages = with pkgs; [
 
 ```bash
 nix flake update
-darwin-rebuild switch --flake ~/.config/nix-darwin
 ```
+Then rebuild as above.
 
 ### Rolling Back
 
@@ -114,62 +136,40 @@ darwin-rebuild --list-generations
 darwin-rebuild switch --flake ~/.config/nix-darwin --rollback
 ```
 
-## Linux Builder (work machine only)
+## File Structure
 
-A NixOS VM runs on the work machine for building Linux packages.
-
-```bash
-# Stop the VM
-sudo launchctl stop org.nixos.linux-builder
-
-# Start the VM
-sudo launchctl start org.nixos.linux-builder
-
-# SSH into the VM
-sudo ssh -i /etc/nix/builder_ed25519 builder@linux-builder
 ```
-
-## Useful Commands
-
-```bash
-# List all generations
-darwin-rebuild --list-generations
-
-# Clean old generations (free space)
-nix-collect-garbage -d
-
-# Search for packages
-nix search nixpkgs <package-name>
-
-# Check what will change
-darwin-rebuild build --flake ~/.config/nix-darwin
-nix store diff-closures /var/run/current-system ./result
+.
+├── flake.nix           # Both machines' darwinConfigurations, inputs
+├── flake.lock          # Locked dependency versions
+├── configuration.nix   # Shared system-level configuration
+├── home.nix            # Shared user packages and programs
+├── nvim/                # Neovim configuration
+│   └── lua/
+│       └── config/      # Lua configuration modules
+├── README.md            # This file
+├── SETUP_GUIDE.md       # Fresh-machine bootstrap runbook (this repo's two machines)
+├── GITHUB_SETUP.md      # Repo/remote status and cross-machine sync workflow
+└── .gitignore
 ```
 
 ## Troubleshooting
 
 ### "No such file or directory: darwin-rebuild"
 
-Make sure you've restarted your terminal after first installation.
-
-### Permission errors
-
-Some commands need sudo for system-level changes. The first-time setup command handles this automatically.
+Restart your terminal after first installation, or run
+`source ~/.zshrc`.
 
 ### Flake evaluation errors
 
-Make sure all files are committed to git (flakes ignore untracked files by default):
+Flakes ignore untracked files by default — make sure everything is committed:
 ```bash
 git add .
 ```
 
 ## Resources
 
+- [nix-dokken-dev](https://github.com/tv2norge/nix-dokken-dev) — general setup docs, module options reference, Linux builder / sandbox VM details
 - [Nix Darwin Documentation](https://github.com/LnL7/nix-darwin)
 - [Home Manager Documentation](https://nix-community.github.io/home-manager/)
 - [NixOS Package Search](https://search.nixos.org/packages)
-- [Nix Pills](https://nixos.org/guides/nix-pills/)
-
-## License
-
-Feel free to use this configuration as inspiration for your own setup!

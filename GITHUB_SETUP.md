@@ -1,156 +1,46 @@
-# Publishing to GitHub
+# GitHub Remote & Cross-Machine Sync
 
-## Quick Setup
+This repo is already published — `origin` is
+`git@github.com:arnestorksen/nix-darwin.git` (SSH). Nothing to set up here;
+this doc just covers how the two machines (`Mac-TM7WHWRD7G` / work,
+`arne-mac` / home) stay in sync through it.
 
-### 1. Create GitHub Repository
-
-Go to [github.com/new](https://github.com/new) and create a new repository:
-
-- **Name:** `nix-darwin` (or any name you prefer)
-- **Description:** "My declarative macOS configuration with nix-darwin"
-- **Visibility:** Public (recommended) or Private
-- **DO NOT** initialize with README, .gitignore, or license (we already have these)
-
-### 2. Add Remote and Push
-
-Replace `YOUR_USERNAME` with your GitHub username:
-
-```bash
-cd ~/.config/nix-darwin
-
-# Add GitHub as remote
-git remote add origin https://github.com/YOUR_USERNAME/nix-darwin.git
-
-# Push to GitHub
-git push -u origin main
-```
-
-### 3. Update Documentation
-
-After creating the repo, update the clone URL in:
-- `README.md` (line 32)
-- `SETUP_GUIDE.md` (line 45)
-
-Replace `YOUR_USERNAME` with your actual GitHub username.
-
-Then commit and push the changes:
-
-```bash
-git add README.md SETUP_GUIDE.md
-git commit -m "Update repository URLs"
-git push
-```
-
-## Using SSH Instead of HTTPS
-
-If you prefer SSH authentication:
-
-```bash
-# Add SSH remote instead
-git remote add origin git@github.com:YOUR_USERNAME/nix-darwin.git
-
-# Push
-git push -u origin main
-```
-
-## Setting Up on Second Mac
-
-Once pushed to GitHub, on your other Mac:
-
-```bash
-# After installing Nix (see SETUP_GUIDE.md step 1)
-git clone https://github.com/YOUR_USERNAME/nix-darwin.git ~/.config/nix-darwin
-cd ~/.config/nix-darwin
-
-# Customize for the new machine (see SETUP_GUIDE.md step 3)
-# Then build
-nix run nix-darwin -- switch --flake ~/.config/nix-darwin
-```
-
-## Keeping Configs in Sync
-
-### Pushing Changes from Mac #1
+## Pushing Changes (from either machine)
 
 ```bash
 cd ~/.config/nix-darwin
 git add .
-git commit -m "Update package list"
+git commit -m "Update configuration"
 git push
 ```
 
-### Pulling Changes on Mac #2
+## Pulling Changes (on the other machine)
 
 ```bash
 cd ~/.config/nix-darwin
 git pull
-darwin-rebuild switch --flake ~/.config/nix-darwin
 ```
+Then rebuild — `nix-rebuild` on the work Mac, or
+`darwin-rebuild switch --flake ~/.config/nix-darwin#arne-mac` on the home Mac.
 
-## Privacy Considerations
+## What's Actually in This Repo
 
-### What to Share Publicly
+Git identity (name, email, signing key) is set per-machine in `flake.nix` —
+work Mac via `tv2.workEnv.*` (email, SSH signing key), home Mac via
+`programs.git.settings` (GPG key ID). Both are already committed to this repo
+and public in git history/commits regardless, so there's nothing extra
+exposed by them being in `flake.nix` too.
 
-✅ Safe to share:
-- Nix configuration files
-- Package lists
-- Editor configurations
-- Shell setup
+**Not in this repo** (kept private deliberately): the actual SSH/GPG private
+keys, 1Password vault contents, and the `nix-dokken-dev` module's source
+(referenced as a flake input, currently pointed at a local checkout pending
+push — see [README.md](./README.md#work-mac-mac-tm7whwrd7g-specifics)).
 
-### What to Keep Private
+## Authentication Issues
 
-❌ Don't commit:
-- SSH keys
-- API tokens
-- Passwords or secrets
-- Personal documents
-
-**Note:** Your git email and name are in `home.nix` - this is fine since they're already public in your commits.
-
-## Alternative: Private Repository
-
-If you prefer to keep your config private:
-
-1. Create a **private** repository on GitHub
-2. The process is the same, but only you can see it
-3. You'll need to authenticate on each machine (use GitHub CLI or SSH keys)
-
-## Repository Badge (Optional)
-
-Add this to the top of your README.md for a nice badge:
-
-```markdown
-[![Built with Nix](https://img.shields.io/badge/Built_With-Nix-5277C3.svg?logo=nixos&labelColor=73C3D5)](https://nixos.org)
-```
-
-## Example Repositories
-
-For inspiration, check out other public nix-darwin configs:
-- Search GitHub for "nix-darwin dotfiles"
-- Look at the "nix-darwin" topic on GitHub
-
-## Troubleshooting
-
-### Authentication Failed
-
-If using HTTPS and you get authentication errors:
 ```bash
-# Use GitHub CLI for authentication
-gh auth login
+ssh -T git@github.com
 ```
-
-Or switch to SSH:
-```bash
-git remote set-url origin git@github.com:YOUR_USERNAME/nix-darwin.git
-```
-
-### Accidentally Committed Secrets
-
-If you accidentally commit secrets:
-1. Remove the file and commit
-2. Push the changes
-3. **Important:** Rotate the leaked credentials immediately
-4. Consider using `git filter-branch` or BFG Repo-Cleaner to remove from history
-
-For sensitive configs, consider using tools like:
-- `sops-nix` for encrypted secrets
-- `agenix` for age-encrypted secrets in Nix
+Should greet you as `arnestorksen`. If it doesn't, see the 1Password SSH Agent
+troubleshooting in [SETUP_GUIDE.md](./SETUP_GUIDE.md#step-3-machine-specific-prerequisites)
+— the same agent used for commit signing is used for this remote's SSH auth.

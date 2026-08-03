@@ -8,7 +8,10 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-    nix-dokken-dev.url = "git+ssh://git@github.com/tv2norge/nix-dokken-dev";
+    # TEMPORARY: pointed at the local checkout to test the sandbox VM work
+    # before it's pushed. Switch this back once nix-dokken-dev is pushed:
+    #   nix-dokken-dev.url = "git+ssh://git@github.com/tv2norge/nix-dokken-dev";
+    nix-dokken-dev.url = "git+file:///Users/ars/code/nix-work-env";
     nix-dokken-dev.inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -41,6 +44,12 @@
                 personalEmail = "arne.storksen@gmail.com";
                 personalSigningKey = "D923C0D7FA86BA69";
                 personalRepoDirs = [ "~/code/private/" "~/.config/nix-darwin/" ];
+
+                # aarch64-linux, not aarch64-darwin -- this is the guest's
+                # architecture (the Lima VM), not the host Mac's.
+                # TEMPORARY: disabled until nix.linux-builder is up and running
+                # (bootstrapping chicken-and-egg -- see Determinate->Lix migration).
+                # sandbox.imagePath = "${nix-dokken-dev.packages.aarch64-linux.sandbox-image}/nixos.qcow2";
               };
             };
           }
