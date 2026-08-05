@@ -240,7 +240,7 @@ in
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
 
-      # Secrets via macOS Keychain
+      # Secrets via macOS Keychain -- to set/rotate, see README.md#updating-the-github-pat
       export GITHUB_PERSONAL_ACCESS_TOKEN=$(security find-generic-password -a "$USER" -s "github-pat" -w 2>/dev/null)
 
       bindkey -v

@@ -136,6 +136,18 @@ darwin-rebuild --list-generations
 darwin-rebuild switch --flake ~/.config/nix-darwin --rollback
 ```
 
+### Updating the GitHub PAT
+
+`home.nix` exports `GITHUB_PERSONAL_ACCESS_TOKEN` in zsh init by reading it from the macOS
+Keychain (service `github-pat`), not from the repo. To set or rotate it:
+
+```bash
+security add-generic-password -a "$USER" -s "github-pat" -w "<new-token>" -U
+```
+
+`-U` updates the entry in place if one already exists. Open a new shell (or `exec zsh`) to pick up
+the change — no rebuild needed since the value isn't stored in the Nix config.
+
 ## File Structure
 
 ```
