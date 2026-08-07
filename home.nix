@@ -157,6 +157,130 @@ let
     "commit-msg" = "${requireIssueRefHook}/bin/commit-msg";
     "prepare-commit-msg" = "${requirePrepareCommitMsgHook}/bin/prepare-commit-msg";
   };
+
+  # fzf-powered tab switcher for Ghostty, triggered by Cmd+Shift+O via skhd
+  # (see configuration.nix -- Ghostty's own keybind system can't run an
+  # arbitrary external command without typing it into a focused terminal
+  # first). Runs in its own small popup window (spawned by
+  # ghosttyOpenTabSwitcher) rather
+  # than the current tab, so it feels like a floating overlay instead of
+  # taking over whatever pane you're in. Uses Ghostty 1.3+'s native
+  # AppleScript dictionary (application -> windows -> tabs -> terminals, see
+  # Ghostty.app/Contents/Resources/Ghostty.sdef) via `osascript -l
+  # JavaScript` to list tabs (excluding its own popup window), enumerate,
+  # select, and activate.
+  #
+  # Ghostty's own "wait after command" setting -- which is supposed to
+  # auto-close the surface once its command exits -- turned out unreliable
+  # in testing: the exact same command/config sometimes closed the window on
+  # exit and sometimes left it sitting at "Process exited. Press any key to
+  # close." with no discernible pattern. So instead of depending on that,
+  # this closes its own window explicitly via an EXIT trap, which is
+  # deterministic regardless of that bug.
+  ghosttyTabSwitcher = pkgs.writeShellApplication {
+    name = "ghostty-switch-tab";
+    runtimeInputs = [ pkgs.fzf ];
+    text = ''
+      self_id=$(osascript -l JavaScript -e 'Application("Ghostty").frontWindow().id()')
+
+      close_self() {
+        osascript -l JavaScript - "$self_id" <<'JXA'
+      function run(argv) {
+        const gh = Application("Ghostty");
+        for (const w of gh.windows()) {
+          if (w.id() === argv[0]) {
+            gh.closeWindow(w);
+            break;
+          }
+        }
+      }
+      JXA
+      }
+      trap close_self EXIT
+
+      tabs=$(osascript -l JavaScript - "$self_id" <<'JXA'
+      function run(argv) {
+        const selfId = argv[0];
+        const gh = Application("Ghostty");
+        const wins = gh.windows();
+        const out = [];
+        for (let w = 0; w < wins.length; w++) {
+          if (wins[w].id() === selfId) continue;
+          const tabs = wins[w].tabs();
+          for (let t = 0; t < tabs.length; t++) {
+            const marker = tabs[t].selected() ? "*" : " ";
+            out.push([marker, tabs[t].name(), w + 1, t + 1].join("\t"));
+          }
+        }
+        return out.join("\n");
+      }
+      JXA
+      )
+
+      if [ -z "$tabs" ]; then
+        exit 0
+      fi
+
+      selection=$(printf '%s\n' "$tabs" | fzf --delimiter='\t' --with-nth=1,2 \
+        --prompt='tab> ' --height=~100% --reverse)
+
+      if [ -z "$selection" ]; then
+        exit 0
+      fi
+
+      win=$(printf '%s' "$selection" | cut -f3)
+      tab=$(printf '%s' "$selection" | cut -f4)
+
+      osascript -l JavaScript - "$win" "$tab" <<'JXA'
+      function run(argv) {
+        const win = Number(argv[0]);
+        const tab = Number(argv[1]);
+        const gh = Application("Ghostty");
+        const target = gh.windows()[win - 1];
+        gh.selectTab(target.tabs()[tab - 1]);
+        gh.activateWindow(target);
+      }
+      JXA
+    '';
+  };
+
+  # Launcher invoked by skhd's Cmd+Shift+O binding (see configuration.nix):
+  # spawns a popup window running ghosttyTabSwitcher, then immediately
+  # resizes/centers it via System
+  # Events (Ghostty's scripting dictionary has no window size/position
+  # controls). There's a brief visible flash at the default size/position
+  # before the resize lands -- seems inherent to how a newly created window
+  # first renders, not something a delay fixes (tested with delays from 0 to
+  # 300ms; all show the same flash) -- accepted as a minor cosmetic
+  # papercut rather than something worth fighting further.
+  ghosttyOpenTabSwitcher = pkgs.writeShellApplication {
+    name = "ghostty-open-tab-switcher";
+    text = ''
+      osascript -l JavaScript - <<'JXA'
+      ObjC.import("AppKit");
+
+      function run() {
+        const gh = Application("Ghostty");
+        const cfg = gh.newSurfaceConfiguration({});
+        cfg.command = "${ghosttyTabSwitcher}/bin/ghostty-switch-tab";
+        cfg.waitAfterCommand = false;
+        gh.newWindow({ withConfiguration: cfg });
+
+        const se = Application("System Events");
+        const w = se.processes.byName("ghostty").windows()[0];
+
+        const screen = $.NSScreen.mainScreen.frame;
+        const width = 720;
+        const height = 440;
+        w.position = [
+          screen.origin.x + (screen.size.width - width) / 2,
+          screen.origin.y + screen.size.height * 0.22,
+        ];
+        w.size = [width, height];
+      }
+      JXA
+    '';
+  };
 in
 
 {
@@ -198,6 +322,10 @@ in
 
     # Task runner
     go-task
+
+    # Ghostty tab switcher (fzf over open tabs, see keybind below)
+    ghosttyTabSwitcher
+    ghosttyOpenTabSwitcher
 
   ];
 
@@ -258,7 +386,9 @@ in
       window-padding-y = 8;
       scrollback-limit = 10000;
       mouse-hide-while-typing = true;
-      keybind = "global:cmd+shift+y=toggle_quick_terminal";
+      keybind = [
+        "global:cmd+shift+y=toggle_quick_terminal"
+      ];
       copy-on-select = "clipboard";
     };
   };
