@@ -246,18 +246,23 @@ let
 
   # Launcher invoked by skhd's Cmd+Shift+O binding (see hosts/*/configuration.nix):
   # spawns a popup window running ghosttyTabSwitcher, then immediately
-  # resizes/centers it via System
-  # Events (Ghostty's scripting dictionary has no window size/position
-  # controls). There's a brief visible flash at the default size/position
-  # before the resize lands -- seems inherent to how a newly created window
-  # first renders, not something a delay fixes (tested with delays from 0 to
-  # 300ms; all show the same flash) -- accepted as a minor cosmetic
-  # papercut rather than something worth fighting further.
+  # resizes/centers it via System Events (Ghostty's scripting dictionary has
+  # no window size/position controls). There's a brief visible flash at the
+  # default size/position before the resize lands -- seems inherent to how a
+  # newly created window first renders, not something a delay fixes (tested
+  # with delays from 0 to 300ms; all showed the same flash).
+  #
+  # A short delay before the resize call *does* matter for a different
+  # reason, though: without it, the resize occasionally silently no-ops
+  # (window stays at the default frame) -- a race between window creation
+  # and the new window actually showing up in System Events' accessibility
+  # tree, most noticeable when triggered via skhd rather than run directly.
   ghosttyOpenTabSwitcher = pkgs.writeShellApplication {
     name = "ghostty-open-tab-switcher";
     text = ''
       osascript -l JavaScript - <<'JXA'
       ObjC.import("AppKit");
+      ObjC.import("unistd");
 
       function run() {
         const gh = Application("Ghostty");
@@ -265,6 +270,8 @@ let
         cfg.command = "${ghosttyTabSwitcher}/bin/ghostty-switch-tab";
         cfg.waitAfterCommand = false;
         gh.newWindow({ withConfiguration: cfg });
+
+        $.usleep(150000);
 
         const se = Application("System Events");
         const w = se.processes.byName("ghostty").windows()[0];
@@ -317,6 +324,7 @@ in
     colima
     docker
     docker-compose
+    container
 
     # Kubernetes / Crossplane
     crossplane-cli
