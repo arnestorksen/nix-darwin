@@ -101,3 +101,45 @@ From the repo checkout on the running machine:
 ```
 sudo nixos-rebuild switch --flake .#gamix
 ```
+
+## 1Password SSH + GPG setup
+
+`hosts/gamix/configuration.nix` installs 1Password (CLI + GUI) and
+`home/linux.nix` points `SSH_AUTH_SOCK` at its agent socket and configures git
+to sign commits with the personal GPG key (`D923C0D7FA86BA69`, same as
+`arne-mac`). None of the actual secret material can be provisioned by Nix —
+these steps are manual, done once per machine:
+
+1. **GPG key:** import the existing personal private key into gamix's keyring
+   (e.g. from a backup export, or `gpg --export-secret-keys` on another
+   machine that has it, transferred over a channel you trust):
+   ```
+   gpg --import /path/to/personal-key-secret.asc
+   ```
+   Verify with `gpg --list-secret-keys D923C0D7FA86BA69`.
+
+2. **1Password SSH agent:** in the 1Password app, enable Settings → Developer
+   → SSH Agent. Create or import your GitHub SSH key under 1Password's SSH
+   Keys section, and confirm it's allowed through the agent — 1Password
+   requires an explicit per-key allow-list (`~/.config/1Password/ssh/agent.toml`),
+   which the app manages when you toggle a key on in its SSH Agent settings.
+
+3. **Verify the agent is reachable:**
+   ```
+   ssh-add -l
+   ssh -T git@github.com
+   ```
+   The second command should greet you by GitHub username. If `ssh-add -l`
+   reports no identities, double check step 2 (a common cause on the work
+   Mac was being signed into the wrong 1Password vault — same failure mode
+   applies here).
+
+4. **Add the public keys to GitHub** (if not already there from another
+   machine): the SSH public key under Settings → SSH and GPG keys → New SSH
+   key, and the GPG public key (`gpg --armor --export D923C0D7FA86BA69`)
+   under the same page's GPG keys section, so commits show as Verified.
+
+After that, `git clone`/`push` against `https://github.com/...` URLs
+transparently go over SSH (see the `insteadOf` rewrite in
+`home/common.nix`), and commits are signed automatically
+(`commit.gpgSign = true` in `home/linux.nix`).
