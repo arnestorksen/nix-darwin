@@ -17,4 +17,7 @@
     user.name = "Arne M. Størksen";
     user.email = "arne.storksen@gmail.com";
   };
+
+  # Override the shared (Mac-tuned, Retina) font size for this screen.
+  programs.ghostty.settings.font-size = 16;
 }
