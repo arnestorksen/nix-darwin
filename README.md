@@ -110,13 +110,16 @@ to sign commits with the personal GPG key (`D923C0D7FA86BA69`, same as
 `arne-mac`). None of the actual secret material can be provisioned by Nix —
 these steps are manual, done once per machine:
 
-1. **GPG key:** import the existing personal private key into gamix's keyring
-   (e.g. from a backup export, or `gpg --export-secret-keys` on another
-   machine that has it, transferred over a channel you trust):
+1. **GPG key:** the personal key is backed up in 1Password as the "GPG signing
+   key" Secure Note (`Private` vault), with the exported private key in its
+   `notesPlain` field. Import it straight from `op` so the key material never
+   touches a temp file or your shell history:
    ```
-   gpg --import /path/to/personal-key-secret.asc
+   op read "op://Private/GPG signing key/notesPlain" | gpg --import
    ```
-   Verify with `gpg --list-secret-keys D923C0D7FA86BA69`.
+   Verify with `gpg --list-secret-keys D923C0D7FA86BA69`. (`op` uses the
+   desktop app's own unlock state — no separate `op signin` needed once the
+   1Password app is running and unlocked.)
 
 2. **1Password SSH agent:** in the 1Password app, enable Settings → Developer
    → SSH Agent. Create or import your GitHub SSH key under 1Password's SSH
