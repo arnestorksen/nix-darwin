@@ -168,16 +168,16 @@ darwin/
 ├── hosts/
 │   ├── work-mac/configuration.nix    # Mac-TM7WHWRD7G system config
 │   └── arne-mac/configuration.nix    # arne-mac system config
-├── nvim/                   # Neovim configuration
-│   └── lua/
-│       └── config/         # Lua configuration modules
 ├── README.md                # This file
 ├── SETUP_GUIDE.md            # Fresh-machine bootstrap runbook (this repo's two machines)
 ├── GITHUB_SETUP.md           # Repo/remote status and cross-machine sync workflow
 └── AGENTS.md / CLAUDE.md     # Instructions for coding agents working in this directory
 
-../home/common.nix           # home-manager settings shared with gamix (NixOS)
-../home/darwin.nix           # home-manager settings shared by both Mac hosts
+../nvim/                     # Neovim configuration (shared with gamix), used via ../home/common.nix
+│   └── lua/
+│       └── config/          # Lua configuration modules
+../home/common.nix           # home-manager settings shared with gamix (NixOS): ghostty, starship, neovim, git, ripgrep
+../home/darwin.nix           # home-manager settings shared by both Mac hosts only: zsh, k9s, gpg, direnv, colima, etc.
 ```
 
 ## Troubleshooting
