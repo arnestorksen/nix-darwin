@@ -108,6 +108,15 @@
   # actual dotfile/config management is done by home-manager (home/common.nix).
   programs.zsh.enable = true;
 
+  # 1Password. These modules (rather than plain home-manager packages) set up
+  # the polkit rules and setuid wrapper needed for browser native-messaging
+  # and system-auth unlock.
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "arne" ];
+  };
+
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
