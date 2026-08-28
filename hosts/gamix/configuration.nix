@@ -101,7 +101,12 @@
     isNormalUser = true;
     description = "Arne Mellesmo Størksen";
     extraGroups = [ "networkmanager" "wheel" ];
+    shell = pkgs.zsh;
   };
+
+  # Registers zsh in /etc/shells so it's valid as a login shell above;
+  # actual dotfile/config management is done by home-manager (home/common.nix).
+  programs.zsh.enable = true;
 
   nixpkgs.config.allowUnfree = true;
 

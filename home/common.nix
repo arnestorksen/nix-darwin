@@ -8,6 +8,33 @@
   programs.git.enable = true;
   programs.home-manager.enable = true;
 
+  # Shell configuration -- platform-specific bits (Homebrew, macOS Keychain)
+  # are layered on top in home/darwin.nix.
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    profileExtra = ''
+      # oh-my-zsh's kubectl plugin needs this set (and existing) before it's sourced
+      export ZSH_CACHE_DIR="$HOME/.cache/zsh"
+      mkdir -p "$ZSH_CACHE_DIR/completions"
+    '';
+
+    plugins = [
+      {
+        name = "kubectl";
+        src = "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/kubectl";
+      }
+    ];
+    initContent = ''
+      # Nix
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+
+      bindkey -v
+    '';
+  };
+
   # Ghostty terminal. ghostty-bin (prebuilt) only exists for aarch64-darwin
   # in nixpkgs; everywhere else falls back to the source build.
   programs.ghostty = {

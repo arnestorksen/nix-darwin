@@ -338,38 +338,16 @@ in
     XDG_CONFIG_HOME = "$HOME/.config";
   };
 
-  # Shell configuration
+  # Shell configuration -- portable bits (completion, kubectl plugin, vi mode)
+  # come from home/common.nix; only the macOS-specific pieces are added here.
   programs.zsh = {
-    enable = true;
-    enableCompletion = true;
     profileExtra = ''
       eval "$(/opt/homebrew/bin/brew shellenv)"
-
-      # oh-my-zsh's kubectl plugin needs this set (and existing) before it's sourced
-      export ZSH_CACHE_DIR="$HOME/.cache/zsh"
-      mkdir -p "$ZSH_CACHE_DIR/completions"
     '';
 
-    plugins = [
-#      {
-#        name = pkgs.zsh-nix-shell.pname;
-#        src = pkgs.zsh-nix-shell.src;
-#      }
-      {
-        name = "kubectl";
-        src = "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/kubectl";
-      }
-    ];
     initContent = ''
-      # Nix
-      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-      fi
-
       # Secrets via macOS Keychain -- to set/rotate, see README.md#updating-the-github-pat
       export GITHUB_PERSONAL_ACCESS_TOKEN=$(security find-generic-password -a "$USER" -s "github-pat" -w 2>/dev/null)
-
-      bindkey -v
     '';
   };
 
