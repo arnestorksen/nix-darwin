@@ -6,7 +6,11 @@
   ];
 
   programs.git.enable = true;
+  programs.git.settings."url \"git@github.com:\"".insteadOf = "https://github.com/";
   programs.home-manager.enable = true;
+
+  # GPG. gpg-agent's pinentry is platform-specific -- set per-host.
+  programs.gpg.enable = true;
 
   # Shell configuration -- platform-specific bits (Homebrew, macOS Keychain)
   # are layered on top in home/darwin.nix.

@@ -355,9 +355,6 @@ in
     enable = true;
   };
 
-  # GPG
-  programs.gpg.enable = true;
-
   services.gpg-agent = {
     enable = true;
     pinentry.package = pkgs.pinentry_mac;
@@ -371,7 +368,6 @@ in
     settings = {
       init.defaultBranch = "main";
       core.editor = "nvim";
-      "url \"git@github.com:\"".insteadOf = "https://github.com/";
     };
   };
 
