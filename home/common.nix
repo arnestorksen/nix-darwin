@@ -28,14 +28,20 @@
         name = "kubectl";
         src = "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/kubectl";
       }
+      # Recommended to be the last plugin sourced (per its own docs) --
+      # handles vi-mode itself (cursor-shape mode indicator, surround text
+      # objects, correct bracketed-paste handling), so no manual
+      # `bindkey -v` or paste patch needed.
+      {
+        name = "zsh-vi-mode";
+        src = "${pkgs.zsh-vi-mode}/share/zsh-vi-mode";
+      }
     ];
     initContent = ''
       # Nix
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
-
-      bindkey -v
     '';
   };
 
