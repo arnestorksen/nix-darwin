@@ -1,14 +1,15 @@
 # GitHub Remote & Cross-Machine Sync
 
 This repo is already published — `origin` is
-`git@github.com:arnestorksen/nix-darwin.git` (SSH). Nothing to set up here;
-this doc just covers how the two machines (`Mac-TM7WHWRD7G` / work,
-`arne-mac` / home) stay in sync through it.
+`git@github.com:arnestorksen/nix-darwin.git` (SSH), and now holds both this
+`darwin/` config and the NixOS `gamix` config at the repo root. Nothing to set
+up here; this doc just covers how the two Mac machines (`Mac-TM7WHWRD7G` /
+work, `arne-mac` / home) stay in sync through it.
 
 ## Pushing Changes (from either machine)
 
 ```bash
-cd ~/.config/nix-darwin
+cd ~/.config/nixos-config
 git add .
 git commit -m "Update configuration"
 git push
@@ -17,11 +18,11 @@ git push
 ## Pulling Changes (on the other machine)
 
 ```bash
-cd ~/.config/nix-darwin
+cd ~/.config/nixos-config
 git pull
 ```
 Then rebuild — `nix-rebuild` on the work Mac, or
-`darwin-rebuild switch --flake ~/.config/nix-darwin#arne-mac` on the home Mac.
+`darwin-rebuild switch --flake ~/.config/nixos-config/darwin#arne-mac` on the home Mac.
 
 ## What's Actually in This Repo
 

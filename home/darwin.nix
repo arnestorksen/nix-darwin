@@ -159,7 +159,7 @@ let
   };
 
   # fzf-powered tab switcher for Ghostty, triggered by Cmd+Shift+O via skhd
-  # (see configuration.nix -- Ghostty's own keybind system can't run an
+  # (see hosts/*/configuration.nix -- Ghostty's own keybind system can't run an
   # arbitrary external command without typing it into a focused terminal
   # first). Runs in its own small popup window (spawned by
   # ghosttyOpenTabSwitcher) rather
@@ -244,7 +244,7 @@ let
     '';
   };
 
-  # Launcher invoked by skhd's Cmd+Shift+O binding (see configuration.nix):
+  # Launcher invoked by skhd's Cmd+Shift+O binding (see hosts/*/configuration.nix):
   # spawns a popup window running ghosttyTabSwitcher, then immediately
   # resizes/centers it via System
   # Events (Ghostty's scripting dictionary has no window size/position
@@ -284,6 +284,8 @@ let
 in
 
 {
+  imports = [ ./common.nix ];
+
   # Home Manager needs a bit of information about you and the paths it should manage
   home.username = username;
   home.homeDirectory = "/Users/${username}";
@@ -303,7 +305,6 @@ in
     nerd-fonts.fira-code
 
     # Shell utilities
-    ripgrep
     watch
     tree
     jq
@@ -329,14 +330,11 @@ in
 
   ];
 
-  # Let Home Manager install and manage itself
-  programs.home-manager.enable = true;
-
   # Extra PATH entries
   home.sessionPath = [ "$HOME/.local/bin" ];
 
   home.sessionVariables = {
-    DOCKER_HOST = "unix:///Users/ars/.config/colima/default/docker.sock";
+    DOCKER_HOST = "unix:///Users/${username}/.config/colima/default/docker.sock";
     XDG_CONFIG_HOME = "$HOME/.config";
   };
 
@@ -407,7 +405,6 @@ in
 
   # Git — shared settings only; identity is set per-machine in flake.nix
   programs.git = {
-    enable = true;
     lfs.enable = true;
     signing.format = null;
 
@@ -474,7 +471,7 @@ in
 
   # Neovim configuration files
   home.file.".config/nvim/lua" = {
-    source = ./nvim/lua;
+    source = ../darwin/nvim/lua;
     recursive = true;
   };
 

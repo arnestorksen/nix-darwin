@@ -1,12 +1,13 @@
 # Fresh-Machine Bootstrap Runbook
 
-Step-by-step recipe for bringing up one of this repo's two known machines
+Step-by-step recipe for bringing up one of this repo's two known Mac machines
 (`Mac-TM7WHWRD7G` / work, `arne-mac` / home) from a blank macOS install. This is
 specific to those two machines — general nix-darwin/home-manager/`nix-dokken-dev`
 concepts and options are documented in `nix-dokken-dev`'s own README, not here.
-If you're setting up a genuinely new (third) machine, read
+If you're setting up a genuinely new (third) Mac, read
 [README.md](./README.md#the-two-machines) first and add a new
 `darwinConfigurations` block modeled on whichever of the two is the closer match.
+(For a new **NixOS** machine instead, see [../README.md](../README.md).)
 
 ## Step 1: Install Nix
 
@@ -29,9 +30,13 @@ installer instead. We're intentionally using the shell script — see
 
 ```bash
 mkdir -p ~/.config
-git clone git@github.com:arnestorksen/nix-darwin.git ~/.config/nix-darwin
-cd ~/.config/nix-darwin
+git clone git@github.com:arnestorksen/nix-darwin.git ~/.config/nixos-config
+cd ~/.config/nixos-config/darwin
 ```
+
+(The remote is still named `nix-darwin` on GitHub — it now also holds the
+NixOS `gamix` config at the repo root — but the local clone is named
+`nixos-config` to match.)
 
 ## Step 3: Machine-Specific Prerequisites
 
@@ -58,8 +63,8 @@ cd ~/.config/nix-darwin
    ```
 
 3. Confirm `~/code/nix-work-env` (the local `nix-dokken-dev` checkout
-   `flake.nix` currently points at) exists on this machine, since the input
-   isn't pointed at the pushed GitHub repo yet.
+   `darwin/flake.nix` currently points at) exists on this machine, since the
+   input isn't pointed at the pushed GitHub repo yet.
 
 ### Home Mac (`arne-mac`)
 
@@ -70,7 +75,7 @@ No prerequisites — no private inputs, no 1Password SSH agent dependency.
 ### Home Mac — plain path
 
 ```bash
-sudo nix run nix-darwin -- switch --flake ~/.config/nix-darwin#arne-mac
+sudo nix run nix-darwin -- switch --flake ~/.config/nixos-config/darwin#arne-mac
 ```
 
 ### Work Mac — private-input-safe path
@@ -80,7 +85,7 @@ to fetch the private `git+ssh://` `nix-dokken-dev` input. Build as your user
 first (SSH agent available), then activate the already-built result as root:
 
 ```bash
-nix build ~/.config/nix-darwin#darwinConfigurations.Mac-TM7WHWRD7G.system -o /tmp/nix-darwin-system
+nix build ~/.config/nixos-config/darwin#darwinConfigurations.Mac-TM7WHWRD7G.system -o /tmp/nix-darwin-system
 sudo mv /etc/nix/nix.custom.conf /etc/nix/nix.custom.conf.before-nix-darwin   # only if it exists
 sudo /tmp/nix-darwin-system/sw/bin/darwin-rebuild activate
 ```
@@ -126,12 +131,12 @@ git log --show-signature -1
 ## Step 7: Future Updates
 
 - Work Mac: `nix-rebuild` (handles the build-as-user/activate-as-root split automatically)
-- Home Mac: `darwin-rebuild switch --flake ~/.config/nix-darwin#arne-mac`
+- Home Mac: `darwin-rebuild switch --flake ~/.config/nixos-config/darwin#arne-mac`
 
 ## Maintenance
 
 ```bash
-cd ~/.config/nix-darwin
+cd ~/.config/nixos-config/darwin
 nix flake update
 # then rebuild as in Step 7
 

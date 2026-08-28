@@ -1,10 +1,15 @@
-# Instructions for agents working in this repo
+# Instructions for agents working in this directory
+
+Scope: this `darwin/` subtree only (the two Mac configs). For the NixOS
+`gamix` config at the repo root, plain `nixos-rebuild switch --flake .#gamix`
+is fine — none of the caveats below apply there.
 
 ## Rebuilding
 
-Always suggest `nix-rebuild` to apply changes — a shell function (provided by `nix-dokken-dev`,
-defined in the user's shell profile, not in this repo) that builds the flake as the user and then
-runs `sudo darwin-rebuild activate`.
+Always suggest `nix-rebuild` to apply changes on the work Mac — a shell
+function (provided by `nix-dokken-dev`, defined in the user's shell profile,
+not in this repo) that builds the flake as the user and then runs `sudo
+darwin-rebuild activate`.
 
 Do **not** suggest plain `darwin-rebuild switch --flake .#<host>` on the work Mac
 (`Mac-TM7WHWRD7G`) — it doesn't work. The flake has a private `nix-dokken-dev` input fetched over
@@ -22,7 +27,7 @@ uninstaller, etc.) on `Mac-TM7WHWRD7G` or `arne-mac` — **warn the user first, 
 actual uninstall command be run from the stock macOS Terminal.app, never from Ghostty or any
 other terminal/shell installed via Nix.**
 
-Why: Ghostty (`programs.ghostty` in `home.nix`) and the active zsh profile are both
+Why: Ghostty (`programs.ghostty` in `../home/darwin.nix`) and the active zsh profile are both
 Nix-store-managed on these machines. Uninstalling Nix from inside a Nix-installed terminal can
 make the terminal binary or shell profile scripts you're actively running from disappear or break
 mid-operation, potentially leaving no working shell to finish or recover from a partial uninstall.
