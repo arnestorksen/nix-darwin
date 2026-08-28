@@ -32,9 +32,14 @@ config, so partitioning is manual.
 nixos-generate-config --root /mnt
 ```
 
-This writes `/mnt/etc/nixos/hardware-configuration.nix`, which describes the
-disk layout, filesystems, and kernel modules for *this specific machine*.
-Keep this file — you'll drop it into the repo in step 4.
+This writes two files under `/mnt/etc/nixos/`:
+
+- `hardware-configuration.nix` — describes the disk layout, filesystems, and
+  kernel modules for *this specific machine*. Keep this file — you'll drop
+  it into the repo in step 4.
+- `configuration.nix` — a generic starter config. **Ignore/discard this
+  one** — it's not used at all once you install with `--flake` in step 5;
+  this repo's `hosts/<host>/configuration.nix` replaces it entirely.
 
 ### 3. Get this repo onto the new machine
 
