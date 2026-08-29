@@ -8,9 +8,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    sidra.url = "github:wimpysworld/sidra";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, home-manager, sidra, ... }:
   let
     system = "x86_64-linux"; # or aarch64-linux
   in
@@ -23,6 +25,9 @@
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
+          home-manager.extraSpecialArgs = {
+            sidraPkg = sidra.packages.${system}.default;
+          };
           home-manager.users.arne = import ./home/linux.nix;
         }
       ];

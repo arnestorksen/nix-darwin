@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, sidraPkg, ... }:
 
 {
   imports = [ ./common.nix ];
@@ -11,6 +11,7 @@
     fzf
     htop
     claude-code
+    sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
 
   programs.git.settings = {
