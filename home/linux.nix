@@ -33,4 +33,20 @@
 
   # Override the shared (Mac-tuned, Retina) font size for this screen.
   programs.ghostty.settings.font-size = 16;
+
+  # macOS-style `caffeinate`: blocks sleep/idle-suspend for as long as it
+  # runs. Ctrl-C (or close the terminal) to let normal sleep resume.
+  programs.zsh.shellAliases.caffeinate =
+    "systemd-inhibit --what=sleep:idle --why=caffeinate --mode=block sleep infinity";
+
+  # Autostart CoreCtrl (GPU fan curve control) minimized to the system tray,
+  # so the fan curve set there keeps applying without opening it manually.
+  xdg.configFile."autostart/corectrl.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=CoreCtrl
+    Exec=${pkgs.corectrl}/bin/corectrl --minimize-systray
+    Icon=corectrl
+    X-GNOME-Autostart-enabled=true
+  '';
 }

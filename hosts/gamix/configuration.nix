@@ -26,6 +26,12 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Games library, on its own ext4 partition (nvme0n1p4).
+  fileSystems."/home/arne/Games" = {
+    device = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
+    fsType = "ext4";
+  };
+
   networking.hostName = "gamix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -108,6 +114,26 @@
   # actual dotfile/config management is done by home-manager (home/common.nix).
   programs.zsh.enable = true;
 
+  # 32-bit support is needed for Steam/Proton; amdgpu (open-source) covers
+  # both the Raphael iGPU and the RX 6800-series discrete card here.
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
+
+  # Gaming
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
+  };
+  programs.gamemode.enable = true;
+
+  # GPU fan curve control (AMD RX 6800-series). Polkit rule shipped by the
+  # package grants access to the "wheel" group, which arne is already in.
+  programs.corectrl.enable = true;
+
   # 1Password. These modules (rather than plain home-manager packages) set up
   # the polkit rules and setuid wrapper needed for browser native-messaging
   # and system-auth unlock.
@@ -126,6 +152,14 @@
   #  wget
     vivaldi
     neovim
+
+    # Gaming
+    lutris
+    heroic # Epic Games Store + GOG, native launcher (uses legendary/gogdl)
+    mangohud
+    protonup-qt
+    discord
+    prismlauncher
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
