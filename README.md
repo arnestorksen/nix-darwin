@@ -146,3 +146,11 @@ After that, `git clone`/`push` against `https://github.com/...` URLs
 transparently go over SSH (see the `insteadOf` rewrite in
 `home/common.nix`), and commits are signed automatically
 (`commit.gpgSign = true` in `home/linux.nix`).
+
+### Skipping the GPG passphrase prompt
+
+The key's passphrase is also stored on the same "GPG signing key" Secure Note,
+in its `password` field. Run `gpg-unlock` (a shell function defined in
+`home/linux.nix`) once per login to pull it from 1Password and preset it into
+`gpg-agent`'s cache via `gpg-preset-passphrase` — after that, signed commits
+don't need pinentry until the agent restarts (cache TTL is set to ~400 days).

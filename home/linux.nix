@@ -24,7 +24,34 @@
   services.gpg-agent = {
     enable = true;
     pinentry.package = pkgs.pinentry-qt; # fits the KDE Plasma desktop
+    # Cache the passphrase for as long as the agent is alive (effectively
+    # once per login/reboot), instead of the ~2h default -- avoids retyping
+    # it on every signed commit while still requiring it once per session.
+    defaultCacheTtl = 34560000;
+    maxCacheTtl = 34560000;
+    # Needed for gpg-preset-passphrase (see the `gpg-unlock` shell function
+    # below), which loads the passphrase from 1Password instead of pinentry.
+    extraConfig = "allow-preset-passphrase";
   };
+
+  # Preloads the GPG signing key's passphrase into gpg-agent's cache straight
+  # from 1Password (op:// requires the desktop app running and unlocked, same
+  # as the manual `op read | gpg --import` step in README.md). Run once per
+  # login; after that, signed commits don't need pinentry until the agent
+  # restarts (see the extended cache TTL above).
+  programs.zsh.initContent = ''
+    gpg-unlock() {
+      local libexecdir passphrase grip
+      libexecdir=$(gpgconf --list-dirs libexecdir)
+      passphrase=$(op read "op://Private/GPG signing key/password") || return 1
+      gpg --with-colons --with-keygrip --list-secret-keys D923C0D7FA86BA69 \
+        | awk -F: '$1 == "grp" { print $10 }' \
+        | while IFS= read -r grip; do
+            printf '%s\n' "$passphrase" \
+              | "$libexecdir/gpg-preset-passphrase" --preset "$grip"
+          done
+    }
+  '';
 
   # 1Password's SSH agent socket (its Linux app uses the same path as macOS).
   # Requires: SSH Agent enabled in 1Password's own settings, and the key
