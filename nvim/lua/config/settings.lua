@@ -23,3 +23,7 @@ vim.g.mapleader = " "
 
 -- Set colorscheme
 vim.cmd[[colorscheme tokyonight-night]]
+
+-- Show current file's full path in the terminal window/tab title (e.g. Ghostty tab)
+vim.opt.title = true
+vim.opt.titlestring = [[%{expand('%:p') != '' ? expand('%:p') : getcwd()}%( %m%)]]
