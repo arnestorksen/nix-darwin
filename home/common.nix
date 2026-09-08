@@ -3,6 +3,8 @@
 {
   home.packages = with pkgs; [
     ripgrep
+    dnsutils # dig, nslookup, etc.
+    gh
   ];
 
   programs.git.enable = true;
