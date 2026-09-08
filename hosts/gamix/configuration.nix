@@ -14,7 +14,12 @@
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 3;
+  # /boot is a 96M EFI partition (no room to grow it - the disk is fully
+  # partitioned with a Windows dual-boot install alongside it), and each
+  # generation's kernel+initrd is ~27M. 3 generations left only ~17M free,
+  # which a single kernel bump was enough to exhaust. 2 keeps one fallback
+  # generation while leaving real headroom.
+  boot.loader.systemd-boot.configurationLimit = 2;
   boot.loader.efi.canTouchEfiVariables = true;
   nix.gc = {
     automatic = true;
