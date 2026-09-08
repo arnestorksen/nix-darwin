@@ -26,6 +26,10 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # QEMU userspace emulation for aarch64, so aarch64-linux derivations
+  # (e.g. Raspberry Pi 3 SD images) can be built on this x86_64 host.
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   # Games library, on its own ext4 partition (nvme0n1p4).
   fileSystems."/home/arne/Games" = {
     device = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
