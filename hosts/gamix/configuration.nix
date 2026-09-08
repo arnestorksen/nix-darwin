@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports =
@@ -31,6 +31,35 @@
     device = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
     fsType = "ext4";
   };
+
+  # Swapfile for hibernation. Root only has ~13G free, so this lives on the
+  # Games partition instead (744G free there); no dedicated swap partition
+  # since the disk has no unpartitioned space to carve one out of.
+  # 34G covers the ~32G (30GiB) of RAM with headroom for the resume image.
+  swapDevices = [
+    { device = "/home/arne/Games/swapfile"; size = 34 * 1024; }
+  ];
+
+  # Hibernation resume: the kernel reads the swap header directly off the
+  # block device at a byte offset (resume_offset), bypassing the filesystem,
+  # since the swapfile isn't its own partition. resume_offset is computed
+  # after the swapfile exists on disk (see README/commit for the command)
+  # and must be recomputed if the swapfile is ever recreated or moved.
+  boot.resumeDevice = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
+  # Offset of the swapfile's first extent (in 4K blocks), from:
+  #   sudo filefrag -v /home/arne/Games/swapfile | head -5
+  # Must be recomputed with the same command if the swapfile is ever
+  # recreated (e.g. resized) — a stale offset makes resume silently fail.
+  boot.kernelParams = [ "resume_offset=150892544" ];
+
+  # systemd-logind runs with ProtectHome=yes, which hides all of /home
+  # (including our swapfile) from it. It needs to read the file directly to
+  # compute the on-disk offset when hibernate is triggered (e.g. from the
+  # KDE session). BindReadOnlyPaths doesn't reliably punch through
+  # ProtectHome for a path that crosses onto a separate mounted filesystem
+  # like /home/arne/Games, so just disable the protection for this unit.
+  systemd.services.systemd-logind.serviceConfig.ProtectHome =
+    lib.mkForce false;
 
   networking.hostName = "gamix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
