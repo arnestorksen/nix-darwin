@@ -47,6 +47,12 @@
     '';
   };
 
+  # fzf-powered history search (ctrl-r), file/dir completion (**<tab>)
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   # Ghostty terminal. ghostty-bin (prebuilt) only exists for aarch64-darwin
   # in nixpkgs; everywhere else falls back to the source build.
   programs.ghostty = {
