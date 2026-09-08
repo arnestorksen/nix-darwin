@@ -210,7 +210,9 @@
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  # Minecraft "Open to LAN" discovery: the host broadcasts a multicast
+  # announcement on UDP 4445 that populates the client's LAN-world list.
+  networking.firewall.allowedUDPPorts = [ 4445 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
