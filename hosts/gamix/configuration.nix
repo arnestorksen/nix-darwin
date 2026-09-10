@@ -21,6 +21,9 @@
   # generation while leaving real headroom.
   boot.loader.systemd-boot.configurationLimit = 2;
   boot.loader.efi.canTouchEfiVariables = true;
+  # Not using ZFS, but silence the eval warning about this option's
+  # default (adopting the 26.11 default early since it's irrelevant here).
+  boot.zfs.forceImportRoot = false;
   nix.gc = {
     automatic = true;
     dates = "weekly";
