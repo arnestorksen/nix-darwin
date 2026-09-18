@@ -16,10 +16,10 @@
   boot.loader.systemd-boot.enable = true;
   # /boot is a 96M EFI partition (no room to grow it - the disk is fully
   # partitioned with a Windows dual-boot install alongside it), and each
-  # generation's kernel+initrd is ~27M. 3 generations left only ~17M free,
-  # which a single kernel bump was enough to exhaust. 2 keeps one fallback
-  # generation while leaving real headroom.
-  boot.loader.systemd-boot.configurationLimit = 2;
+  # generation's kernel+initrd is actually ~43M (not ~27M as first assumed),
+  # plus Windows/Ubuntu bootloader files take up another ~20M. Two
+  # generations (~86M) don't fit alongside those; only 1 does.
+  boot.loader.systemd-boot.configurationLimit = 1;
   boot.loader.efi.canTouchEfiVariables = true;
   # Not using ZFS, but silence the eval warning about this option's
   # default (adopting the 26.11 default early since it's irrelevant here).
