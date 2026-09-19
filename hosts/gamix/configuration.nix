@@ -38,15 +38,14 @@
   # (e.g. Raspberry Pi 3 SD images) can be built on this x86_64 host.
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  # Games library, on its own ext4 partition (nvme0n1p4).
-  fileSystems."/home/arne/Games" = {
-    device = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
-    fsType = "ext4";
-  };
+  # Games used to live on its own ext4 partition (nvme0n1p4); that partition
+  # was merged into root (absorbing the old, too-small root partition) to
+  # fix chronic Nix store space pressure, so /home/arne/Games is now just a
+  # plain directory rather than a separate mount.
 
-  # Swapfile for hibernation. Root only has ~13G free, so this lives on the
-  # Games partition instead (744G free there); no dedicated swap partition
-  # since the disk has no unpartitioned space to carve one out of.
+  # Swapfile for hibernation, at /home/arne/Games/swapfile (an arbitrary
+  # historical path — nothing here depends on that directory being special
+  # anymore, it's just wherever the file happens to live on root).
   # 34G covers the ~32G (30GiB) of RAM with headroom for the resume image.
   swapDevices = [
     { device = "/home/arne/Games/swapfile"; size = 34 * 1024; }
@@ -62,6 +61,10 @@
   #   sudo filefrag -v /home/arne/Games/swapfile | head -5
   # Must be recomputed with the same command if the swapfile is ever
   # recreated (e.g. resized) — a stale offset makes resume silently fail.
+  # RECOMPUTE THIS after the root/Games partition merge (2026-09) even
+  # though the swapfile was only renamed, not rewritten: the filesystem
+  # resize that grew this partition is a good reason to double check rather
+  # than assume the old offset still holds.
   boot.kernelParams = [ "resume_offset=150892544" ];
 
   # systemd-logind runs with ProtectHome=yes, which hides all of /home
