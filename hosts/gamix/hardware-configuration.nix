@@ -13,13 +13,6 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-  # DANGER: this UUID (the old Games partition) is only valid as root AFTER
-  # completing the live-USB migration in ./ROOT_GAMES_MERGE.md. Until then,
-  # do not `nixos-rebuild switch`/`boot` this config on the machine as it
-  # currently exists (root still on the old, since-deleted partition) — the
-  # next boot would fail to find root, with no fallback generation to
-  # recover to (configurationLimit = 1). This UUID only becomes correct
-  # once you're chrooted into the migrated system in Phase 8 of that doc.
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
       fsType = "ext4";

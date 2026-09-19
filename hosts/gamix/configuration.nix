@@ -43,12 +43,11 @@
   # fix chronic Nix store space pressure, so /home/arne/Games is now just a
   # plain directory rather than a separate mount.
 
-  # Swapfile for hibernation, at /home/arne/Games/swapfile (an arbitrary
-  # historical path — nothing here depends on that directory being special
-  # anymore, it's just wherever the file happens to live on root).
+  # Swapfile for hibernation, on root (outside /home so systemd-logind's
+  # ProtectHome doesn't hide it).
   # 34G covers the ~32G (30GiB) of RAM with headroom for the resume image.
   swapDevices = [
-    { device = "/home/arne/Games/swapfile"; size = 34 * 1024; }
+    { device = "/swapfile"; size = 34 * 1024; }
   ];
 
   # Hibernation resume: the kernel reads the swap header directly off the
@@ -58,23 +57,12 @@
   # and must be recomputed if the swapfile is ever recreated or moved.
   boot.resumeDevice = "/dev/disk/by-uuid/c8a9b8f2-74f1-42b9-88b0-86853c3c6544";
   # Offset of the swapfile's first extent (in 4K blocks), from:
-  #   sudo filefrag -v /home/arne/Games/swapfile | head -5
+  #   sudo filefrag -v /swapfile | head -5
   # Must be recomputed with the same command if the swapfile is ever
   # recreated (e.g. resized) — a stale offset makes resume silently fail.
-  # RECOMPUTE THIS after the root/Games partition merge (2026-09) even
-  # though the swapfile was only renamed, not rewritten: the filesystem
-  # resize that grew this partition is a good reason to double check rather
-  # than assume the old offset still holds.
+  # A plain rename/mv within the same filesystem keeps the extents, so the
+  # offset is unchanged by moving the file.
   boot.kernelParams = [ "resume_offset=150892544" ];
-
-  # systemd-logind runs with ProtectHome=yes, which hides all of /home
-  # (including our swapfile) from it. It needs to read the file directly to
-  # compute the on-disk offset when hibernate is triggered (e.g. from the
-  # KDE session). BindReadOnlyPaths doesn't reliably punch through
-  # ProtectHome for a path that crosses onto a separate mounted filesystem
-  # like /home/arne/Games, so just disable the protection for this unit.
-  systemd.services.systemd-logind.serviceConfig.ProtectHome =
-    lib.mkForce false;
 
   networking.hostName = "gamix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
