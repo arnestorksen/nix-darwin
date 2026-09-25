@@ -6,15 +6,14 @@ is fine — none of the caveats below apply there.
 
 ## Rebuilding
 
-Always suggest `nix-rebuild` to apply changes on the work Mac — a shell
-function (provided by `nix-dokken-dev`, defined in the user's shell profile,
-not in this repo) that builds the flake as the user and then runs `sudo
-darwin-rebuild activate`.
+Always suggest `nix-rebuild` to apply changes — a shell function (defined in `work.nix`, so it
+exists on the work Mac only) that builds the flake as the user and then runs
+`sudo darwin-rebuild activate`.
 
 Do **not** suggest plain `darwin-rebuild switch --flake .#<host>` on the work Mac
-(`Mac-TM7WHWRD7G`) — it doesn't work. The flake has a private `nix-dokken-dev` input fetched over
-`git+ssh` (currently pointed at a local `git+file://` checkout, see `flake.nix`), which needs the
-user's 1Password SSH agent to authenticate; running the build under `sudo` can't reach that agent.
+(`Mac-TM7WHWRD7G`) — it doesn't work. The flake has a private `dokken-aws-helper` input fetched
+over `git+ssh`, which needs the user's 1Password SSH agent to authenticate; running the build
+under `sudo` can't reach that agent.
 `nix-rebuild` avoids this by building as the user first and only using `sudo` for the activation
 step. See [README.md](./README.md#making-changes) for details. On `arne-mac` (no private inputs),
 plain `darwin-rebuild switch --flake` is fine.

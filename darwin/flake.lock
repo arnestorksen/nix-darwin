@@ -1,5 +1,26 @@
 {
   "nodes": {
+    "dash0-nur": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789379428,
+        "narHash": "sha256-IDOwT8EqcaX6TqearBWufTiGxajJ/jFeXGCtp+IN0G0=",
+        "owner": "dash0hq",
+        "repo": "nur",
+        "rev": "a66d706d7182440a1b70330fb43ebe90937f03ca",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dash0hq",
+        "repo": "nur",
+        "type": "github"
+      }
+    },
     "determinate": {
       "inputs": {
         "determinate-nixd-aarch64-darwin": "determinate-nixd-aarch64-darwin",
@@ -60,16 +81,15 @@
     "dokken-aws-helper": {
       "inputs": {
         "nixpkgs": [
-          "nix-dokken-dev",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1773830361,
-        "narHash": "sha256-lK7tt1Lc29V7yyhqZLwL+dolZA0TRlrmCSqXHzsCPrw=",
+        "lastModified": 1782729768,
+        "narHash": "sha256-OCdSHEcQBeV8O4TWN9CawLwLydIztzxq1dWufrmsXVg=",
         "ref": "refs/heads/main",
-        "rev": "24dab85f09d201bb3db4a462c9ab109f13bf19b6",
-        "revCount": 15,
+        "rev": "476d0ad774257ca88fbe13a5e0a945e97c7aab43",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/tv2norge/dokken-aws-helper"
       },
@@ -113,6 +133,24 @@
       "original": {
         "type": "tarball",
         "url": "https://flakehub.com/f/hercules-ci/flake-parts/0.1"
+      }
+    },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
       }
     },
     "git-hooks-nix": {
@@ -202,27 +240,6 @@
         "type": "github"
       }
     },
-    "nix-dokken-dev": {
-      "inputs": {
-        "dokken-aws-helper": "dokken-aws-helper",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1786094178,
-        "narHash": "sha256-aIYDPSnxuwkJF/9QVcdjL8jgWqdMtvCnXo7b7xL1pTg=",
-        "ref": "refs/heads/main",
-        "rev": "e3efab0bfd201f830bae0b66506cf2d83c1b403c",
-        "revCount": 24,
-        "type": "git",
-        "url": "file:///Users/ars/code/nix-work-env"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///Users/ars/code/nix-work-env"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1782767157,
@@ -301,11 +318,27 @@
     },
     "root": {
       "inputs": {
+        "dash0-nur": "dash0-nur",
         "determinate": "determinate",
+        "dokken-aws-helper": "dokken-aws-helper",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
-        "nix-dokken-dev": "nix-dokken-dev",
         "nixpkgs": "nixpkgs_3"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
       }
     }
   },

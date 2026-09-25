@@ -8,14 +8,18 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-    # TEMPORARY: pointed at the local checkout to test the sandbox VM work
-    # before it's pushed. Switch this back once nix-dokken-dev is pushed:
-    #   nix-dokken-dev.url = "git+ssh://git@github.com/tv2norge/nix-dokken-dev";
-    nix-dokken-dev.url = "git+file:///Users/ars/code/nix-work-env";
-    nix-dokken-dev.inputs.nixpkgs.follows = "nixpkgs";
+    # Work Mac only (see work.nix). dokken-aws-helper is a private TV2 repo
+    # fetched over git+ssh -- this is why the work Mac needs the
+    # build-as-user/activate-as-root split (`nix-rebuild`), see README.
+    dokken-aws-helper.url = "git+ssh://git@github.com/tv2norge/dokken-aws-helper";
+    dokken-aws-helper.inputs.nixpkgs.follows = "nixpkgs";
+    # Pre-built dash0 CLI binaries; the dash0-cli flake itself only exposes a
+    # buildGoModule source build, which nothing caches.
+    dash0-nur.url = "github:dash0hq/nur";
+    dash0-nur.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, determinate, nix-dokken-dev }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, determinate, ... }:
     {
       # Work Mac (ARM)
       darwinConfigurations."Mac-TM7WHWRD7G" = nix-darwin.lib.darwinSystem {
@@ -24,33 +28,14 @@
           ./hosts/work-mac/configuration.nix
           determinate.darwinModules.default
           ({ ... }: { determinateNix.enable = true; })
-          nix-dokken-dev.darwinModules.work
-          ({ ... }: { tv2.workEnv.enableLinuxBuilder = false; })
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { hostname = "Mac-TM7WHWRD7G"; username = "ars"; };
+            home-manager.extraSpecialArgs = { inherit inputs; hostname = "Mac-TM7WHWRD7G"; username = "ars"; };
             home-manager.users.ars = {
-              imports = [ ../home/darwin.nix nix-dokken-dev.homeManagerModules.work ];
-              tv2.workEnv = {
-                enable = true;
-                workEmail = "arne.storksen@tv2.no";
-                gitUserName = "Arne Mellesmo Størksen";
-                sshSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBqRo+OElcjXCy4JqZyE2gSDd1wUiDx+u5xs1XYLDAxt";
-                enable1PasswordSigning = true;
-                dokkenAwsHelperPackage = nix-dokken-dev.packages.aarch64-darwin.dokken-aws-helper;
-                personalEmail = "arne.storksen@gmail.com";
-                personalSigningKey = "D923C0D7FA86BA69";
-                personalRepoDirs = [ "~/code/private/" "~/.config/nix-darwin/" ];
-
-                # aarch64-linux, not aarch64-darwin -- this is the guest's
-                # architecture (the Lima VM), not the host Mac's.
-                # TEMPORARY: disabled until nix.linux-builder is up and running
-                # (bootstrapping chicken-and-egg -- see Determinate->Lix migration).
-                # sandbox.imagePath = "${nix-dokken-dev.packages.aarch64-linux.sandbox-image}/nixos.qcow2";
-              };
+              imports = [ ../home/darwin.nix ./git-issue-workflow.nix ./work.nix ];
             };
           }
         ];
@@ -66,9 +51,9 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { hostname = "arne-mac"; username = "arne"; };
+            home-manager.extraSpecialArgs = { inherit inputs; hostname = "arne-mac"; username = "arne"; };
             home-manager.users.arne = {
-              imports = [ ../home/darwin.nix ];
+              imports = [ ../home/darwin.nix ./git-issue-workflow.nix ];
               programs.git.settings = {
                 user.name = "Arne Mellesmo Størksen";
                 user.email = "arne.storksen@gmail.com";

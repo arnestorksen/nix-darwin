@@ -27,15 +27,15 @@ Then rebuild — `nix-rebuild` on the work Mac, or
 ## What's Actually in This Repo
 
 Git identity (name, email, signing key) is set per-machine in `flake.nix` —
-work Mac via `tv2.workEnv.*` (email, SSH signing key), home Mac via
-`programs.git.settings` (GPG key ID). Both are already committed to this repo
+work Mac via `work.nix` (email, SSH signing key), home Mac via
+`programs.git.settings` in `flake.nix` (GPG key ID). Both are already committed to this repo
 and public in git history/commits regardless, so there's nothing extra
 exposed by them being in `flake.nix` too.
 
 **Not in this repo** (kept private deliberately): the actual SSH/GPG private
-keys, 1Password vault contents, and the `nix-dokken-dev` module's source
-(referenced as a flake input, currently pointed at a local checkout pending
-push — see [README.md](./README.md#work-mac-mac-tm7whwrd7g-specifics)).
+keys, 1Password vault contents, and the `dokken-aws-helper` source (a private
+TV2 repo referenced as a `git+ssh://` flake input — see
+[README.md](./README.md#work-mac-mac-tm7whwrd7g-specifics)).
 
 ## Authentication Issues
 

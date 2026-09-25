@@ -2,9 +2,9 @@
 
 Step-by-step recipe for bringing up one of this repo's two known Mac machines
 (`Mac-TM7WHWRD7G` / work, `arne-mac` / home) from a blank macOS install. This is
-specific to those two machines — general nix-darwin/home-manager/`nix-dokken-dev`
-concepts and options are documented in `nix-dokken-dev`'s own README, not here.
-If you're setting up a genuinely new (third) Mac, read
+specific to those two machines — general nix-darwin/home-manager concepts and
+options are out of scope here; see the links under Getting Help.
+If you're setting up a genuinely new (third) machine, read
 [README.md](./README.md#the-two-machines) first and add a new
 `darwinConfigurations` block modeled on whichever of the two is the closer match.
 (For a new **NixOS** machine instead, see [../README.md](../README.md).)
@@ -62,10 +62,6 @@ NixOS `gamix` config at the repo root — but the local clone is named
    determinate-nixd auth login
    ```
 
-3. Confirm `~/code/nix-work-env` (the local `nix-dokken-dev` checkout
-   `darwin/flake.nix` currently points at) exists on this machine, since the
-   input isn't pointed at the pushed GitHub repo yet.
-
 ### Home Mac (`arne-mac`)
 
 No prerequisites — no private inputs, no 1Password SSH agent dependency.
@@ -81,7 +77,7 @@ sudo nix run nix-darwin -- switch --flake ~/.config/nixos-config/darwin#arne-mac
 ### Work Mac — private-input-safe path
 
 The plain command above will fail here: `root` (under `sudo`) has no SSH agent
-to fetch the private `git+ssh://` `nix-dokken-dev` input. Build as your user
+to fetch the private `git+ssh://` `dokken-aws-helper` input. Build as your user
 first (SSH agent available), then activate the already-built result as root:
 
 ```bash
@@ -146,8 +142,7 @@ darwin-rebuild --list-generations
 
 ## Getting Help
 
-- General nix-darwin/home-manager/`nix-dokken-dev` concepts, module options,
-  Linux builder / sandbox VM setup: see
-  [nix-dokken-dev](https://github.com/tv2norge/nix-dokken-dev)'s README
+- Work-Mac-specific wiring (TV2 tooling, git identity, `nix-rebuild`): see
+  [`work.nix`](./work.nix) and [README.md](./README.md#work-mac-mac-tm7whwrd7g-specifics)
 - [Nix Darwin docs](https://github.com/LnL7/nix-darwin)
 - [search.nixos.org](https://search.nixos.org)

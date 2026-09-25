@@ -29,6 +29,15 @@
 
   nix.settings.trusted-users = [ "@admin" username ];
 
+  # No nix.linux-builder here: the Linux builder comes from Determinate's
+  # native Virtualization.framework one, and nix-darwin's own QEMU-based
+  # `nix.linux-builder.enable` *requires* `nix.enable = true`, which the
+  # determinate module sets to false. If FlakeHub early access is ever
+  # lost, drop the determinate module and add:
+  #   nix.linux-builder.enable = true;
+  #   nix.linux-builder.config.virtualisation.diskSize = lib.mkForce (50 * 1024);
+  # See README.md -- "Work Mac specifics".
+
   # Global hotkey daemon. Currently used for just one binding: Cmd+Shift+O
   # opens the Ghostty tab-switcher popup (ghosttyOpenTabSwitcher in
   # home.nix) from anywhere, without typing into whatever terminal happens
