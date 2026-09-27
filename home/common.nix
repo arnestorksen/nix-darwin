@@ -53,6 +53,26 @@
     enableZshIntegration = true;
   };
 
+  # Direnv integration
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+  };
+
+  # Workaround for nix-direnv 3.2.0 (nix-community/nix-direnv#786):
+  # _nix_refresh_gcroots touches .direnv/flake-profile-*, which also matches the
+  # watched flake-profile-<hash>.rc, so every load invalidates every other
+  # shell's cache and two terminals in one repo reload each other forever.
+  # Upstream's fix (PR #790) drops the refresh entirely; nothing here needs it
+  # (no nh, no mtime-based gcroot cleaner), so make it a no-op.
+  # Sourced after home-manager's hm-nix-direnv.sh thanks to the zz- prefix; kept
+  # out of direnvrc because nix-direnv watches that file itself.
+  # Remove once nixpkgs ships a nix-direnv with #790 merged.
+  home.file.".config/direnv/lib/zz-nix-direnv-no-gcroot-touch.sh".text = ''
+    _nix_refresh_gcroots() { :; }
+  '';
+
   # Ghostty terminal. ghostty-bin (prebuilt) only exists for aarch64-darwin
   # in nixpkgs; everywhere else falls back to the source build.
   programs.ghostty = {
@@ -182,7 +202,6 @@
       # Formatters and linters
       gofumpt
       gotools
-      terraform
       shfmt
       shellcheck
     ];
