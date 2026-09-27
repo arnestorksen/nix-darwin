@@ -59,6 +59,13 @@
   # added under its SSH Keys section -- see README.md#1password-ssh--gpg-setup.
   home.sessionVariables.SSH_AUTH_SOCK = "$HOME/.1password/agent.sock";
 
+  # Since GTK 4.20, GTK apps (e.g. Ghostty) no longer compose dead keys
+  # themselves under Wayland compositors that don't implement the
+  # text-input/input-method protocol (KDE Plasma's kwin_wayland doesn't),
+  # breaking keys like the Norwegian ¨/^/~ dead key. GTK_IM_MODULE=simple
+  # restores the old X11-style compose behavior.
+  home.sessionVariables.GTK_IM_MODULE = "simple";
+
   # Override the shared (Mac-tuned, Retina) font size for this screen.
   programs.ghostty.settings.font-size = 16;
 
