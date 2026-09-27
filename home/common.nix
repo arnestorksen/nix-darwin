@@ -44,6 +44,23 @@
       if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
         . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
+
+      # The kubectl plugin above only defines its aliases if `kubectl` is
+      # already on $PATH the moment it's sourced, once, at shell startup --
+      # it misses kubectl pulled in later by direnv/nix-direnv (e.g. a
+      # project flake's devShell). If kubectl isn't around yet, keep
+      # checking on each prompt and load the plugin's aliases the first
+      # time kubectl actually shows up.
+      if (( ! $+commands[kubectl] )); then
+        _kubectl_plugin_autoload() {
+          (( $+commands[kubectl] )) || return
+          autoload -Uz add-zsh-hook
+          add-zsh-hook -d precmd _kubectl_plugin_autoload
+          source "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/kubectl/kubectl.plugin.zsh"
+        }
+        autoload -Uz add-zsh-hook
+        add-zsh-hook precmd _kubectl_plugin_autoload
+      fi
     '';
   };
 
