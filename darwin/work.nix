@@ -139,6 +139,39 @@ in
       limactl start --tty=false nix-linux 2>/dev/null || true
       limactl shell nix-linux "$@"
     }
+
+    # nixdev: isolated NixOS guest for agent work. Holds no host credentials
+    # and mounts nothing from the host -- see ~/code/mixos/README.md for why.
+    #
+    # The Lima template deliberately lives in that repo rather than being
+    # generated here, so the guest's NixOS config and the VM definition share
+    # one git history. (Writing to ~/.lima/<instance>/ the way the nix-linux
+    # block above does doesn't actually control a running instance anyway:
+    # Lima owns that directory and rewrites it at creation time.)
+    nixdev() {
+      local tmpl="$HOME/code/mixos/lima/nixdev.yaml"
+      if limactl list -q 2>/dev/null | grep -qx nixdev; then
+        limactl start --tty=false nixdev 2>/dev/null || true
+      else
+        if [ ! -f "$tmpl" ]; then
+          echo "nixdev: $tmpl not found -- clone the mixos repo first" >&2
+          return 1
+        fi
+        limactl start --tty=false --name=nixdev "$tmpl" || return 1
+      fi
+      limactl shell nixdev "$@"
+    }
+
+    # Throw the sandbox away and recreate it. By design the guest holds nothing
+    # worth keeping -- push your work first.
+    nixdev-reset() {
+      printf 'Delete the nixdev VM and everything in it? [y/N] '
+      local reply; read -r reply
+      if [ "$reply" != y ]; then echo "aborted"; return 1; fi
+      limactl stop -f nixdev 2>/dev/null
+      limactl delete -f nixdev 2>/dev/null
+      limactl start --tty=false --name=nixdev "$HOME/code/mixos/lima/nixdev.yaml"
+    }
   '';
 
   # Sync GitHub PAT from 1Password to macOS Keychain at login.
