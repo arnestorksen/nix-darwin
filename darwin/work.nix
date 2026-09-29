@@ -174,7 +174,12 @@ in
         return 1
       fi
       limactl copy -r "$repo" "nixdev:$home/mixos" || return 1
-      limactl shell nixdev -- sudo nixos-rebuild switch --flake "$home/mixos#$cfg"
+      limactl shell nixdev -- sudo nixos-rebuild switch --flake "$home/mixos#$cfg" || return 1
+      # The restart is not optional. A switch leaves sshd holding the account's
+      # old login shell, so every session lands in bash instead of zsh and the
+      # prompt looks broken; the transient hostname stays stale the same way.
+      echo "nixdev-apply: restarting to pick up the new login shell..."
+      limactl restart --tty=false nixdev
     }
 
     # Throw the sandbox away and rebuild it from scratch. By design the guest
