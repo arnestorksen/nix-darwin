@@ -8,7 +8,8 @@
   description = "nixdev guest for ars, built on mixos";
 
   inputs = {
-    # No remote yet. nixdev-apply overrides this with its copy in the guest.
+    # mixos is always consumed from the local clone. This URL only serves
+    # locking on the host; in the guest nixdev-apply overrides it with its copy.
     mixos.url = "git+file:///Users/ars/code/mixos";
     nixpkgs.follows = "mixos/nixpkgs";
 

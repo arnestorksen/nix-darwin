@@ -6,10 +6,11 @@
 
 # The flake that defines the guest. mixos itself is only its baseline library.
 #   - a local directory: copied into the guest (a host path means nothing in
-#     there), with its `mixos` input pointed at a fresh copy of MIXOS_REPO.
-#     A subdirectory of a git repo works and may import ../ from that repo.
-#   - anything else (github:you/nixdev, git+https://...): built as-is.
+#     there). A subdirectory of a git repo works and may import ../ from it.
+#   - anything else (github:you/nixdev, git+https://...): fetched by the guest.
 #   - set but empty (MIXOS_FLAKE=): mixos's own fallback guest.
+# Either way mixos itself is never fetched: the guest flake's `mixos` input is
+# always overridden with a copy of the local clone, MIXOS_REPO.
 : "${MIXOS_FLAKE=$HOME/.config/nix-darwin/nixdev}"
 : "${MIXOS_REPO:=$HOME/code/mixos}"
 : "${MIXOS_CONFIG:=nixdev}"
@@ -104,13 +105,15 @@ nixdev-apply() {
       print -u2 "nixdev-apply: failed copying $top into the guest"
       return 1
     fi
-    # Its lock names mixos by a host path. Until mixos has a remote, feed it
-    # the copy -- which also means local mixos edits apply without relocking.
-    _nixdev_copy_mixos || return 1
-    override=(--override-input mixos "path:$guest_home/mixos")
     target="git+file://$guest_home/personal${sub:+?dir=$sub}#$MIXOS_CONFIG"
   else
     target="$MIXOS_FLAKE#$MIXOS_CONFIG"
+  fi
+
+  # mixos is always the local clone, whatever the guest flake's lock says.
+  if [[ -n $MIXOS_FLAKE ]]; then
+    _nixdev_copy_mixos || return 1
+    override=(--override-input mixos "path:$guest_home/mixos")
   fi
 
   if ! limactl shell nixdev -- sudo nixos-rebuild switch \
