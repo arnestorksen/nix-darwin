@@ -141,62 +141,14 @@ in
     }
 
     # nixdev: isolated NixOS guest for agent work. Holds no host credentials
-    # and mounts nothing from the host -- see ~/code/mixos/README.md for why.
+    # and mounts nothing from the host -- see ~/code/mixos/README.md.
     #
-    # The Lima template deliberately lives in that repo rather than being
-    # generated here, so the guest's NixOS config and the VM definition share
-    # one git history. (Writing to ~/.lima/<instance>/ the way the nix-linux
-    # block above does doesn't actually control a running instance anyway:
-    # Lima owns that directory and rewrites it at creation time.)
-    nixdev() {
-      local tmpl="$HOME/code/mixos/lima/nixdev.yaml"
-      if limactl list -q 2>/dev/null | grep -qx nixdev; then
-        limactl start --tty=false nixdev 2>/dev/null || true
-      else
-        if [ ! -f "$tmpl" ]; then
-          echo "nixdev: $tmpl not found -- clone the mixos repo first" >&2
-          return 1
-        fi
-        limactl start --tty=false --name=nixdev "$tmpl" || return 1
-      fi
-      limactl shell nixdev "$@"
-    }
-
-    # Copy the mixos config into the guest and rebuild it. The repo is copied
-    # rather than cloned because the guest deliberately has no credentials and
-    # mixos has no remote yet; limactl copy is the one sanctioned way in.
-    nixdev-apply() {
-      local repo="$HOME/code/mixos"
-      local cfg="''${MIXOS_CONFIG:-ars}"
-      local home="/home/$USER.guest"
-      if [ ! -d "$repo" ]; then
-        echo "nixdev-apply: $repo not found" >&2
-        return 1
-      fi
-      limactl copy -r "$repo" "nixdev:$home/mixos" || return 1
-      limactl shell nixdev -- sudo nixos-rebuild switch --flake "$home/mixos#$cfg" || return 1
-      # The restart is not optional. A switch leaves sshd holding the account's
-      # old login shell, so every session lands in bash instead of zsh and the
-      # prompt looks broken; the transient hostname stays stale the same way.
-      echo "nixdev-apply: restarting to pick up the new login shell..."
-      limactl restart --tty=false nixdev
-    }
-
-    # Throw the sandbox away and rebuild it from scratch. By design the guest
-    # holds nothing worth keeping -- push your work first.
-    #
-    # This re-applies the config afterwards. Recreating from the template alone
-    # leaves you on nixos-lima's stock image: bash, no home-manager, no
-    # starship, no Claude Code.
-    nixdev-reset() {
-      printf 'Delete the nixdev VM and everything in it? [y/N] '
-      local reply; read -r reply
-      if [ "$reply" != y ]; then echo "aborted"; return 1; fi
-      limactl stop -f nixdev 2>/dev/null
-      limactl delete -f nixdev 2>/dev/null
-      limactl start --tty=false --name=nixdev "$HOME/code/mixos/lima/nixdev.yaml" || return 1
-      nixdev-apply
-    }
+    # Kept in a separate file because these functions are mostly shell
+    # parameter expansion, and every ''${...} would otherwise need escaping
+    # inside this Nix string. MIXOS_PERSONAL there points mixos at this repo's
+    # mixos.nix, which is how personal config attaches without mixos itself
+    # naming anyone.
+    source ${./nixdev.zsh}
   '';
 
   # Sync GitHub PAT from 1Password to macOS Keychain at login.
