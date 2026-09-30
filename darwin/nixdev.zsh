@@ -28,6 +28,14 @@ _nixdev_warn_untracked() {
 }
 
 # Start the guest if needed, then open a shell or run a command.
+#
+# `limactl shell` launches bash whatever the account's login shell is -- it
+# sets $SHELL from passwd but does not exec it -- so an interactive session
+# lands in bash with no zsh config and no prompt. Checking $SHELL or
+# `getent passwd` will not reveal this; only $ZSH_VERSION (or the prompt
+# itself) does. So ask the guest what the login shell is and pass it
+# explicitly. Only for interactive use: `nixdev -- cmd` is fine in bash and
+# does not need the extra round trip.
 nixdev() {
   local tmpl="$MIXOS_REPO/lima/nixdev.yaml"
   if limactl list -q 2>/dev/null | grep -qx nixdev; then
@@ -39,7 +47,19 @@ nixdev() {
     fi
     limactl start --tty=false --name=nixdev "$tmpl" || return 1
   fi
-  limactl shell nixdev "$@"
+
+  if (( $# )); then
+    limactl shell nixdev "$@"
+    return
+  fi
+
+  local login_shell
+  login_shell=$(limactl shell nixdev -- getent passwd "$USER" 2>/dev/null | cut -d: -f7)
+  if [[ -n $login_shell ]]; then
+    limactl shell --shell "$login_shell" nixdev
+  else
+    limactl shell nixdev
+  fi
 }
 
 # Push the config into the guest and rebuild it there. The guest builds on its
@@ -53,27 +73,43 @@ nixdev-apply() {
     return 1
   fi
   _nixdev_warn_untracked "$MIXOS_REPO" mixos
-  limactl copy -r "$MIXOS_REPO" "nixdev:$guest_home/mixos" || return 1
+  if ! limactl copy -r "$MIXOS_REPO" "nixdev:$guest_home/mixos"; then
+    print -u2 "nixdev-apply: failed copying $MIXOS_REPO into the guest"
+    return 1
+  fi
 
   if [[ -n $MIXOS_PERSONAL ]]; then
     local ref="${MIXOS_PERSONAL#path:}"
     if [[ -d $ref ]]; then
       _nixdev_warn_untracked "$ref" "the personal config"
-      limactl copy -r "$ref" "nixdev:$guest_home/personal" || return 1
+      if ! limactl copy -r "$ref" "nixdev:$guest_home/personal"; then
+        print -u2 "nixdev-apply: failed copying $ref into the guest"
+        return 1
+      fi
       override=(--override-input personal "path:$guest_home/personal")
     else
       override=(--override-input personal "$MIXOS_PERSONAL")
     fi
   fi
 
-  limactl shell nixdev -- sudo nixos-rebuild switch \
-    --flake "$guest_home/mixos#$MIXOS_CONFIG" "${override[@]}" || return 1
+  if ! limactl shell nixdev -- sudo nixos-rebuild switch \
+       --flake "$guest_home/mixos#$MIXOS_CONFIG" "${override[@]}"; then
+    print -u2 "nixdev-apply: nixos-rebuild failed; the guest is unchanged"
+    return 1
+  fi
 
-  # Not optional. A switch leaves sshd serving the account's previous login
-  # shell, so every session lands in bash and the prompt looks broken; the
-  # transient hostname goes stale the same way.
-  print "nixdev-apply: restarting to pick up the new login shell..."
-  limactl restart --tty=false nixdev
+  # Boots into the generation just built, rather than leaving the guest
+  # half-switched. It also settles the transient hostname, which a switch
+  # leaves showing the image's "nixos" until the next boot. (It does NOT fix
+  # an interactive session landing in bash -- that is limactl shell ignoring
+  # the login shell, handled in nixdev() above.)
+  print "nixdev-apply: restarting into the new generation..."
+  if ! limactl restart --tty=false nixdev; then
+    print -u2 "nixdev-apply: the config applied but the restart failed;" \
+              "run 'limactl restart nixdev' yourself"
+    return 1
+  fi
+  print "nixdev-apply: done"
 }
 
 # Throw the sandbox away and rebuild it. By design the guest holds nothing
