@@ -133,7 +133,9 @@ nixdev-apply() {
               "run 'limactl restart nixdev' yourself"
     return 1
   fi
-  print "nixdev-apply: done"
+  # Lima's own READY line suggests `limactl shell nixdev`, which lands in
+  # bash (see nixdev() above). Point at the function that gets it right.
+  print "nixdev-apply: done -- run 'nixdev' to open a shell in the guest"
 }
 
 # Throw the sandbox away and rebuild it. By design the guest holds nothing
