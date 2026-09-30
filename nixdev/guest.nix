@@ -66,17 +66,17 @@
 
       programs.git.settings = {
         # common.nix rewrites https://github.com/ to git@github.com:, which is
-        # right on a machine with a loaded agent. The sandbox has none by
-        # design, so the rewrite breaks credential-free cloning of public
-        # repos before the guest's own key exists.
+        # right on a machine with a loaded agent. The sandbox has no SSH
+        # access to GitHub by design -- it goes over HTTPS with the App's
+        # tokens -- so the rewrite would break every clone and push.
         "url \"git@github.com:\"" = lib.mkForce { };
 
         user.name = "Arne M. Størksen";
         user.email = "arne.storksen@tv2.no";
 
         # Signed with the guest's own key, not the host's 1Password one.
-        # Register that key on GitHub twice: as an authentication key and as
-        # a signing key.
+        # Register it on GitHub as a signing key only: authentication is the
+        # App's job, and a signing key grants no access.
         user.signingKey = "~/.ssh/id_ed25519.pub";
         gpg.format = "ssh";
         commit.gpgSign = true;
