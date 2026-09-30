@@ -151,7 +151,17 @@ in
       source "$HOME/code/mixos/shell/nixdev.zsh"
     fi
   '';
+  # nixdev: `use nixdev` for direnv, and the ~/nixdev tree that maps to the
+  # guest (see ~/code/mixos/README.md). Linked out of the store, like the
+  # helpers, so a `git pull` in mixos updates it without a rebuild.
+  home.file.".config/direnv/lib/mixos.sh".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/code/mixos/shell/direnv.sh";
 
+  # Trusted here rather than by `direnv allow`, which would be lost whenever
+  # a rebuild changes the file.
+  home.file."nixdev/.envrc".text = "use nixdev\n";
+  programs.direnv.config.whitelist.exact = [ "${config.home.homeDirectory}/nixdev/.envrc" ];
+  
   # Sync GitHub PAT from 1Password to macOS Keychain at login.
   # Trigger manually: launchctl kickstart -k gui/$UID/sync-secrets
   launchd.agents.sync-secrets = {
