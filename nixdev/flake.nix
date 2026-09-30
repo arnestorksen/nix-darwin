@@ -3,7 +3,8 @@
 # top-level flake's inputs -- dokken-aws-helper is git+ssh behind the
 # 1Password agent, which the guest has no way to reach.
 #
-# Applied by nixdev-apply (darwin/nixdev.zsh), which finds it via MIXOS_FLAKE.
+# Applied by nixdev-apply (~/code/mixos/shell), which finds it via MIXOS_FLAKE,
+# set in darwin/work.nix.
 {
   description = "nixdev guest for ars, built on mixos";
 

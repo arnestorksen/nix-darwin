@@ -143,11 +143,13 @@ in
     # nixdev: isolated NixOS guest for agent work. Holds no host credentials
     # and mounts nothing from the host -- see ~/code/mixos/README.md.
     #
-    # Kept in a separate file because these functions are mostly shell
-    # parameter expansion, and every ''${...} would otherwise need escaping
-    # inside this Nix string. MIXOS_FLAKE there points at ./nixdev, the guest
-    # flake that builds on mixos's baseline.
-    source ${./nixdev.zsh}
+    # The helpers (nixdev, nixdev-apply, nixdev-reset) ship with mixos and are
+    # sourced from the clone, not the store, so a `git pull` there updates
+    # them without a rebuild. MIXOS_FLAKE is this repo's guest flake.
+    MIXOS_FLAKE="$HOME/.config/nix-darwin/nixdev"
+    if [[ -r $HOME/code/mixos/shell/nixdev.zsh ]]; then
+      source "$HOME/code/mixos/shell/nixdev.zsh"
+    fi
   '';
 
   # Sync GitHub PAT from 1Password to macOS Keychain at login.
