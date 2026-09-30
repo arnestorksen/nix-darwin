@@ -145,9 +145,8 @@ in
     #
     # Kept in a separate file because these functions are mostly shell
     # parameter expansion, and every ''${...} would otherwise need escaping
-    # inside this Nix string. MIXOS_PERSONAL there points mixos at this repo's
-    # mixos.nix, which is how personal config attaches without mixos itself
-    # naming anyone.
+    # inside this Nix string. MIXOS_FLAKE there points at ./nixdev, the guest
+    # flake that builds on mixos's baseline.
     source ${./nixdev.zsh}
   '';
 

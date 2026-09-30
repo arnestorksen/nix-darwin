@@ -4,11 +4,13 @@
 # otherwise need '' escaping in front of every ${...}, which has already
 # produced two bugs. Syntax-check with `zsh -n darwin/nixdev.zsh`.
 
-# The config tree mixos attaches as its `personal` input. A local directory is
-# copied into the guest (a host path means nothing in there); anything else --
-# github:owner/repo, git+ssh://..., a tarball URL -- is handed to Nix as-is.
-# Unset it for the stock anonymous sandbox.
-: "${MIXOS_PERSONAL:=$HOME/.config/nix-darwin}"
+# The flake that defines the guest. mixos itself is only its baseline library.
+#   - a local directory: copied into the guest (a host path means nothing in
+#     there), with its `mixos` input pointed at a fresh copy of MIXOS_REPO.
+#     A subdirectory of a git repo works and may import ../ from that repo.
+#   - anything else (github:you/nixdev, git+https://...): built as-is.
+#   - set but empty (MIXOS_FLAKE=): mixos's own fallback guest.
+: "${MIXOS_FLAKE=$HOME/.config/nix-darwin/nixdev}"
 : "${MIXOS_REPO:=$HOME/code/mixos}"
 : "${MIXOS_CONFIG:=nixdev}"
 
@@ -25,6 +27,20 @@ _nixdev_warn_untracked() {
     print -u2 "    $f"
   done
   print -u2 "  run: git -C $dir add -A"
+}
+
+# Copy the working tree of MIXOS_REPO into the guest's ~/mixos.
+_nixdev_copy_mixos() {
+  local guest_home="/home/$USER.guest"
+  if [[ ! -d $MIXOS_REPO ]]; then
+    print -u2 "nixdev-apply: $MIXOS_REPO not found"
+    return 1
+  fi
+  _nixdev_warn_untracked "$MIXOS_REPO" mixos
+  if ! limactl copy -r "$MIXOS_REPO" "nixdev:$guest_home/mixos"; then
+    print -u2 "nixdev-apply: failed copying $MIXOS_REPO into the guest"
+    return 1
+  fi
 }
 
 # Start the guest if needed, then open a shell or run a command.
@@ -66,34 +82,39 @@ nixdev() {
 # own cores, so the host never builds Linux derivations.
 nixdev-apply() {
   local guest_home="/home/$USER.guest"
+  local target
   local -a override=()
 
-  if [[ ! -d $MIXOS_REPO ]]; then
-    print -u2 "nixdev-apply: $MIXOS_REPO not found"
-    return 1
-  fi
-  _nixdev_warn_untracked "$MIXOS_REPO" mixos
-  if ! limactl copy -r "$MIXOS_REPO" "nixdev:$guest_home/mixos"; then
-    print -u2 "nixdev-apply: failed copying $MIXOS_REPO into the guest"
-    return 1
-  fi
-
-  if [[ -n $MIXOS_PERSONAL ]]; then
-    local ref="${MIXOS_PERSONAL#path:}"
-    if [[ -d $ref ]]; then
-      _nixdev_warn_untracked "$ref" "the personal config"
-      if ! limactl copy -r "$ref" "nixdev:$guest_home/personal"; then
-        print -u2 "nixdev-apply: failed copying $ref into the guest"
-        return 1
-      fi
-      override=(--override-input personal "path:$guest_home/personal")
-    else
-      override=(--override-input personal "$MIXOS_PERSONAL")
+  if [[ -z $MIXOS_FLAKE ]]; then
+    _nixdev_copy_mixos || return 1
+    target="$guest_home/mixos#$MIXOS_CONFIG"
+  elif [[ -d $MIXOS_FLAKE ]]; then
+    # Copy the whole repo, not just the flake directory: a subflake's
+    # ../imports resolve against the repo, and git+file needs the .git.
+    local top sub
+    if ! top=$(git -C "$MIXOS_FLAKE" rev-parse --show-toplevel 2>/dev/null); then
+      print -u2 "nixdev-apply: $MIXOS_FLAKE is not inside a git repository"
+      return 1
     fi
+    sub=${MIXOS_FLAKE:A}
+    sub=${sub#${top:A}}
+    sub=${sub#/}
+    _nixdev_warn_untracked "$top" "the guest flake's repo"
+    if ! limactl copy -r "$top" "nixdev:$guest_home/personal"; then
+      print -u2 "nixdev-apply: failed copying $top into the guest"
+      return 1
+    fi
+    # Its lock names mixos by a host path. Until mixos has a remote, feed it
+    # the copy -- which also means local mixos edits apply without relocking.
+    _nixdev_copy_mixos || return 1
+    override=(--override-input mixos "path:$guest_home/mixos")
+    target="git+file://$guest_home/personal${sub:+?dir=$sub}#$MIXOS_CONFIG"
+  else
+    target="$MIXOS_FLAKE#$MIXOS_CONFIG"
   fi
 
   if ! limactl shell nixdev -- sudo nixos-rebuild switch \
-       --flake "$guest_home/mixos#$MIXOS_CONFIG" "${override[@]}"; then
+       --flake "$target" "${override[@]}"; then
     print -u2 "nixdev-apply: nixos-rebuild failed; the guest is unchanged"
     return 1
   fi
