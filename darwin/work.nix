@@ -147,6 +147,8 @@ in
     # sourced from the clone, not the store, so a `git pull` there updates
     # them without a rebuild. MIXOS_FLAKE is this repo's guest flake.
     MIXOS_FLAKE="$HOME/.config/nix-darwin/nixdev"
+    # The guest's commit-signing key, installed by nixdev-apply when missing.
+    MIXOS_SIGNING_KEY="op://Private/Nixdev signing/private key?ssh-format=openssh"
     if [[ -r $HOME/code/mixos/shell/nixdev.zsh ]]; then
       source "$HOME/code/mixos/shell/nixdev.zsh"
     fi
