@@ -74,13 +74,23 @@
         user.name = "Arne M. Størksen";
         user.email = "arne.storksen@tv2.no";
 
-        # Signed with the guest's own key, not the host's 1Password one.
-        # Register it on GitHub as a signing key only: authentication is the
-        # App's job, and a signing key grants no access.
+        # Signed with a key of the guest's own -- not the host's everyday
+        # one -- registered on GitHub as a signing key only: authentication
+        # is the App's job, and a signing key grants no access.
         user.signingKey = "~/.ssh/id_ed25519.pub";
         gpg.format = "ssh";
         commit.gpgSign = true;
       };
+
+      # The key itself is kept in 1Password on the host and installed by
+      # nixdev-apply (MIXOS_SIGNING_KEY, set in darwin/work.nix). Without it
+      # every commit fails, so say so up front rather than at `git commit`.
+      programs.zsh.initContent = lib.mkAfter ''
+        if [[ ! -e ~/.ssh/id_ed25519 ]]; then
+          print -P "%F{yellow}nixdev:%f no signing key, so commits will fail. On the host, run" \
+            "nixdev-apply with MIXOS_SIGNING_KEY set (see ~/code/mixos/README.md, Commit signing)."
+        fi
+      '';
     };
   };
 }
