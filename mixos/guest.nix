@@ -12,7 +12,7 @@
     group = "users"; # what lima-init's useradd created it with
     home = "/home/ars.guest"; # Lima's convention; anything else gives two homes
     createHome = true;
-    extraGroups = [ "wheel" "docker" ]; # wheel: nixdev-apply rebuilds via sudo
+    extraGroups = [ "wheel" "docker" ]; # wheel: mixos-apply rebuilds via sudo
     shell = pkgs.zsh;
   };
   programs.zsh.enable = true;
@@ -83,12 +83,12 @@
       };
 
       # The key itself is kept in 1Password on the host and installed by
-      # nixdev-apply (MIXOS_SIGNING_KEY, set in darwin/work.nix). Without it
+      # mixos-apply (MIXOS_SIGNING_KEY, set in darwin/work.nix). Without it
       # every commit fails, so say so up front rather than at `git commit`.
       programs.zsh.initContent = lib.mkAfter ''
         if [[ ! -e ~/.ssh/id_ed25519 ]]; then
-          print -P "%F{yellow}nixdev:%f no signing key, so commits will fail. On the host, run" \
-            "nixdev-apply with MIXOS_SIGNING_KEY set (see ~/code/mixos/README.md, Commit signing)."
+          print -P "%F{yellow}mixos:%f no signing key, so commits will fail. On the host, run" \
+            "mixos-apply with MIXOS_SIGNING_KEY set (see ~/code/mixos/README.md, Commit signing)."
         fi
       '';
     };

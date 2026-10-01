@@ -140,20 +140,20 @@ in
       limactl shell nix-linux "$@"
     }
 
-    # nixdev: isolated NixOS guest for agent work. Holds no host credentials
+    # mixos: isolated NixOS guest for agent work. Holds no host credentials
     # and mounts nothing from the host -- see ~/code/mixos/README.md.
     #
-    # The helpers (nixdev, nixdev-apply, nixdev-reset) ship with mixos and are
+    # The helpers (mixos, mixos-apply, mixos-reset) ship with mixos and are
     # sourced from the clone, not the store, so a `git pull` there updates
     # them without a rebuild. MIXOS_FLAKE is this repo's guest flake.
-    MIXOS_FLAKE="$HOME/.config/nix-darwin/nixdev"
-    # The guest's commit-signing key, installed by nixdev-apply when missing.
-    MIXOS_SIGNING_KEY="op://Private/Nixdev signing/private key?ssh-format=openssh"
-    if [[ -r $HOME/code/mixos/shell/nixdev.zsh ]]; then
-      source "$HOME/code/mixos/shell/nixdev.zsh"
+    MIXOS_FLAKE="$HOME/.config/nix-darwin/mixos"
+    # The guest's commit-signing key, installed by mixos-apply when missing.
+    MIXOS_SIGNING_KEY="op://Private/Mixos signing/private key?ssh-format=openssh"
+    if [[ -r $HOME/code/mixos/shell/mixos.zsh ]]; then
+      source "$HOME/code/mixos/shell/mixos.zsh"
     fi
   '';
-  # nixdev: `use nixdev` for direnv, and the ~/nixdev tree that maps to the
+  # mixos: `use mixos` for direnv, and the ~/mixos tree that maps to the
   # guest (see ~/code/mixos/README.md). Linked out of the store, like the
   # helpers, so a `git pull` in mixos updates it without a rebuild.
   home.file.".config/direnv/lib/mixos.sh".source =
@@ -161,8 +161,8 @@ in
 
   # Trusted here rather than by `direnv allow`, which would be lost whenever
   # a rebuild changes the file.
-  home.file."nixdev/.envrc".text = "use nixdev\n";
-  programs.direnv.config.whitelist.exact = [ "${config.home.homeDirectory}/nixdev/.envrc" ];
+  home.file."mixos/.envrc".text = "use mixos\n";
+  programs.direnv.config.whitelist.exact = [ "${config.home.homeDirectory}/mixos/.envrc" ];
   
   # Sync GitHub PAT from 1Password to macOS Keychain at login.
   # Trigger manually: launchctl kickstart -k gui/$UID/sync-secrets
