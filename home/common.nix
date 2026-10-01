@@ -118,8 +118,21 @@
     enableZshIntegration = true;
     settings = {
       format = ''
-        $directory$git_branch$git_state$git_status$kubernetes$nix_shell$cmd_duration$status
+        $os$directory$git_branch$git_state$git_status$kubernetes$nix_shell$cmd_duration$status
         $character'';
+
+      # Which machine this prompt is on: the Apple logo on the Mac, the NixOS
+      # snowflake in the mixos guest. Nerd Font glyphs, written as code points
+      # because the characters themselves are invisible in most editors.
+      os = {
+        disabled = false;
+        format = "[$symbol]($style)";
+        style = "bold blue";
+        symbols = {
+          Macos = builtins.fromJSON ''"\uf179 "''; # nf-fa-apple
+          NixOS = builtins.fromJSON ''"\uf313 "''; # nf-linux-nixos
+        };
+      };
 
       kubernetes = {
         disabled = false;
