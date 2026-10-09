@@ -11,6 +11,7 @@ let
 
   dash0 = inputs.dash0-nur.packages.${system}.dash0;
   dokken-aws-helper = inputs.dokken-aws-helper.packages.${system}.default;
+  mixos = inputs.mixos.packages.${system}.default;
 in
 {
   # Work-only tooling. Anything also wanted on the home Mac (python3, uv,
@@ -55,6 +56,10 @@ in
 
     # Linux VM for running Linux Nix store binaries (see nix-linux below)
     lima
+
+    # mixos: isolated NixOS guest for agent work (see the mixos variables
+    # below, and ~/code/mixos/README.md)
+    mixos
   ];
 
   # Work identity + SSH commit signing via 1Password. ../home/darwin.nix leaves
@@ -99,6 +104,19 @@ in
     # commands silently fall back to the default macOS agent, which has no
     # identities loaded.
     SSH_AUTH_SOCK = "${config.home.homeDirectory}/.1password/agent.sock";
+
+    # mixos: isolated NixOS guest for agent work. Holds no host credentials
+    # and mounts nothing from the host -- see ~/code/mixos/README.md.
+    # Exported, not just set: `mixos` is a separate process, and without
+    # MIXOS_FLAKE it quietly builds mixos's own fallback guest instead.
+    #
+    # The guest flake, in this repo.
+    MIXOS_FLAKE = "${config.home.homeDirectory}/.config/nix-darwin/mixos";
+    # The guest's commit-signing key, installed by `mixos apply` when missing.
+    MIXOS_SIGNING_KEY = "op://Private/Mixos signing/private key?ssh-format=openssh";
+    # Build the guest against the clone rather than the copy of mixos the CLI
+    # was built from, so a `git pull` there takes effect without a rebuild.
+    MIXOS_REPO = "${config.home.homeDirectory}/code/mixos";
   };
 
   # Lima VM that mounts /nix/store read-only, so Linux Nix store binaries can
@@ -139,31 +157,8 @@ in
       limactl start --tty=false nix-linux 2>/dev/null || true
       limactl shell nix-linux "$@"
     }
-
-    # mixos: isolated NixOS guest for agent work. Holds no host credentials
-    # and mounts nothing from the host -- see ~/code/mixos/README.md.
-    #
-    # The helpers (mixos, mixos-apply, mixos-reset) ship with mixos and are
-    # sourced from the clone, not the store, so a `git pull` there updates
-    # them without a rebuild. MIXOS_FLAKE is this repo's guest flake.
-    MIXOS_FLAKE="$HOME/.config/nix-darwin/mixos"
-    # The guest's commit-signing key, installed by mixos-apply when missing.
-    MIXOS_SIGNING_KEY="op://Private/Mixos signing/private key?ssh-format=openssh"
-    if [[ -r $HOME/code/mixos/shell/mixos.zsh ]]; then
-      source "$HOME/code/mixos/shell/mixos.zsh"
-    fi
   '';
-  # mixos: `use mixos` for direnv, and the ~/mixos tree that maps to the
-  # guest (see ~/code/mixos/README.md). Linked out of the store, like the
-  # helpers, so a `git pull` in mixos updates it without a rebuild.
-  home.file.".config/direnv/lib/mixos.sh".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/code/mixos/shell/direnv.sh";
 
-  # Trusted here rather than by `direnv allow`, which would be lost whenever
-  # a rebuild changes the file.
-  home.file."mixos/.envrc".text = "use mixos\n";
-  programs.direnv.config.whitelist.exact = [ "${config.home.homeDirectory}/mixos/.envrc" ];
-  
   # Sync GitHub PAT from 1Password to macOS Keychain at login.
   # Trigger manually: launchctl kickstart -k gui/$UID/sync-secrets
   launchd.agents.sync-secrets = {
