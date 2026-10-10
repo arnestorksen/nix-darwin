@@ -112,6 +112,25 @@
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
+  # Printing/scanning for the Canon PIXMA MG8250: Canon never shipped a
+  # cnijfilter driver for this model, and it's not in nixpkgs' cnijfilter2/
+  # cnijfilter_4_00 either, but the printer speaks AirPrint (IPP) natively,
+  # so CUPS can add it driverless over the network with no vendor driver.
+  # Avahi provides the mDNS discovery driverless printing relies on.
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
+  # Scanning: sane-pixma (bundled in sane-backends) supports the MG8200
+  # series directly. openFirewall opens the ports needed for Canon's BJNP
+  # network-scanner discovery protocol.
+  hardware.sane = {
+    enable = true;
+    openFirewall = true;
+  };
+
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -184,6 +203,7 @@
   #  wget
     vivaldi
     neovim
+    simple-scan # Scanning GUI for the Canon PIXMA MG8250 (via sane-pixma)
 
     # Gaming
     lutris
