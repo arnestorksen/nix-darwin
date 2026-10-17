@@ -48,7 +48,7 @@
 
     users.ars = {
       imports = [
-        # The portable half of this repo: zsh (vi-mode, kubectl plugin),
+        # The portable half of this repo: zsh (kubectl plugin),
         # starship, fzf, direnv, and neovim with its LSP/treesitter/telescope
         # setup.
         #

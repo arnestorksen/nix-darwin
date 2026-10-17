@@ -179,7 +179,7 @@ in
   ];
 
   # mkAfter just to keep these below ../home/darwin.nix's initContent (nix-daemon
-  # sourcing, PAT export, `bindkey -v`); position is otherwise irrelevant,
+  # sourcing, PAT export); position is otherwise irrelevant,
   # since nothing here runs at definition time.
   programs.zsh.initContent = lib.mkAfter ''
     # Build a short `<number>-<slug>` branch name from an issue number/title,

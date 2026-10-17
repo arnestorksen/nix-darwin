@@ -193,7 +193,7 @@ in
     XDG_CONFIG_HOME = "$HOME/.config";
   };
 
-  # Shell configuration -- portable bits (completion, kubectl plugin, vi mode)
+  # Shell configuration -- portable bits (completion, kubectl plugin)
   # come from home/common.nix; only the macOS-specific pieces are added here.
   programs.zsh = {
     profileExtra = ''
