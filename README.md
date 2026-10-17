@@ -99,7 +99,7 @@ there's no separate `home-manager switch` step needed.
 From the repo checkout on the running machine:
 
 ```
-sudo nixos-rebuild switch --flake .#gamix
+nix-rebuild   # shell function from home/linux.nix; same as: nixos-rebuild switch --sudo --flake ~/nixos-config#gamix
 ```
 
 ## 1Password SSH + GPG setup

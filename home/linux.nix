@@ -41,6 +41,13 @@
   # login; after that, signed commits don't need pinentry until the agent
   # restarts (see the extended cache TTL above).
   programs.zsh.initContent = ''
+    # Build as user (so the SSH agent works for private flake inputs); --sudo
+    # only elevates for the activation step. Optional $1 overrides the flake dir.
+    nix-rebuild() {
+      local flake=''${1:-~/nixos-config}
+      nixos-rebuild switch --sudo --flake "$flake#$(hostname -s)"
+    }
+
     gpg-unlock() {
       local libexecdir passphrase grip
       libexecdir=$(gpgconf --list-dirs libexecdir)
