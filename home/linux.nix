@@ -10,6 +10,7 @@
   home.packages = with pkgs; [
     fzf
     htop
+    wl-clipboard # wl-copy / wl-paste, Wayland clipboard
     claude-code
     sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
