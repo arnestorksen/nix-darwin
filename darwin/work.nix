@@ -148,7 +148,7 @@ in
       local flake=''${1:-~/.config/nix-darwin/darwin}
       local hostname=$(hostname -s)
       local system
-      system=$(nix build --no-link --print-out-paths "$flake#darwinConfigurations.$hostname.system") || return 1
+      system=$(_with_nix_github_token nix build --no-link --print-out-paths "$flake#darwinConfigurations.$hostname.system") || return 1
       sudo "$system/sw/bin/darwin-rebuild" activate
     }
 

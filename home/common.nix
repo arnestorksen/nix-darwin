@@ -70,7 +70,16 @@
           "$@"
         fi
       }
-      nix() { _with_nix_github_token command nix "$@"; }
+      # Only for commands likely to hit GitHub: resolving refs in `nix flake
+      # update`/`lock`, or anything naming a github: flake. Everything else
+      # (builds/evals of already-fetched flakes) skips the gh call.
+      nix() {
+        if [[ $1 == flake && $2 == (update|lock) ]] || (( ''${@[(I)*github:*]} )); then
+          _with_nix_github_token command nix "$@"
+        else
+          command nix "$@"
+        fi
+      }
     '';
   };
 
