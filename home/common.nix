@@ -53,6 +53,24 @@
         autoload -Uz add-zsh-hook
         add-zsh-hook precmd _kubectl_plugin_autoload
       fi
+
+      # GitHub token for Nix fetches (github: inputs, flake updates), so they
+      # don't hit the 60 req/hour anonymous API rate limit. Fetched from gh
+      # per invocation and passed via NIX_CONFIG, so it's never written to a
+      # file and only reaches the command being run, not the whole shell
+      # environment. Without a gh login, the command runs unauthenticated.
+      _with_nix_github_token() {
+        local token config
+        token=$(gh auth token 2>/dev/null)
+        if [[ -n $token ]]; then
+          config="access-tokens = github.com=$token"
+          [[ -n $NIX_CONFIG ]] && config+=$'\n'"$NIX_CONFIG"
+          NIX_CONFIG=$config "$@"
+        else
+          "$@"
+        fi
+      }
+      nix() { _with_nix_github_token command nix "$@"; }
     '';
   };
 

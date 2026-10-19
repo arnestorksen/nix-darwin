@@ -44,9 +44,11 @@
   programs.zsh.initContent = ''
     # Build as user (so the SSH agent works for private flake inputs); --sudo
     # only elevates for the activation step. Optional $1 overrides the flake dir.
+    # nixos-rebuild calls the nix binary directly, bypassing the nix() wrapper
+    # in common.nix, so pass the GitHub token explicitly.
     nix-rebuild() {
       local flake=''${1:-~/nixos-config}
-      nixos-rebuild switch --sudo --flake "$flake#$(hostname -s)"
+      _with_nix_github_token nixos-rebuild switch --sudo --flake "$flake#$(hostname -s)"
     }
 
     gpg-unlock() {
