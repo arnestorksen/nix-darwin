@@ -15,6 +15,11 @@
     sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
 
+  programs.plasma = {
+    enable = true;
+    shortcuts.ksmserver."Lock Session" = [ "Screensaver" "Meta+L" "Pause" ];
+  };
+
   programs.git.settings = {
     user.name = "Arne M. Størksen";
     user.email = "arne.storksen@gmail.com";
