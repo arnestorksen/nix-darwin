@@ -17,6 +17,16 @@
     sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
 
+  # Jottacloud daemon, which jotta-cli talks to. Log in once with `jotta-cli login`.
+  systemd.user.services.jottad = {
+    Unit.Description = "Jottacloud daemon";
+    Service = {
+      ExecStart = "${pkgs.jotta-cli}/bin/jottad";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   programs.plasma = {
     enable = true;
     shortcuts.ksmserver."Lock Session" = [ "Screensaver" "Meta+L" "Pause" ];
