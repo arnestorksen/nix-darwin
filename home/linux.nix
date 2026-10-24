@@ -12,6 +12,7 @@
     htop
     wl-clipboard # wl-copy / wl-paste, Wayland clipboard
     claude-code
+    rclone # iCloud Drive download via the iclouddrive backend
     sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
 
