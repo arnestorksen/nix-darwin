@@ -8,6 +8,7 @@
   ];
 
   programs.git.enable = true;
+  programs.git.lfs.enable = true;
   programs.git.settings."url \"git@github.com:\"".insteadOf = "https://github.com/";
   programs.home-manager.enable = true;
 
