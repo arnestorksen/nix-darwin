@@ -16,6 +16,7 @@
     jotta-cli # Jottacloud CLI + jottad daemon
     proton-pass # Proton Pass desktop app
     proton-pass-cli # Proton Pass CLI
+    libreoffice-qt # office suite with KDE integration, opens RTF
     sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
 
