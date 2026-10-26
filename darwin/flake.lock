@@ -204,11 +204,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792407727,
-        "narHash": "sha256-JQ+Epc4LdazT9HbQlMRSpx/z2xr+OCiR4p+xDJVrahY=",
+        "lastModified": 1792767415,
+        "narHash": "sha256-Q2+H6+lNpOWvvbWNCCRR9QXaNYVNsy4G/XVNaVsB75s=",
         "ref": "refs/heads/main",
-        "rev": "438c59b74b1a07cddc28c5d225f3dd16fd39ff9c",
-        "revCount": 50,
+        "rev": "11d0866d291759e2946a8b3e12df0b794cd604df",
+        "revCount": 69,
         "type": "git",
         "url": "file:///Users/ars/code/mixos"
       },
