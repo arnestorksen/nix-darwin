@@ -99,6 +99,8 @@
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
+  # Unlock KWallet at login so apps using the Secret Service (Proton Pass) stay signed in.
+  security.pam.services.sddm.kwallet.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -152,6 +154,13 @@
 
   # Enable flakes
   #nix.settings.experimental-features = "nix-command flakes";
+
+  # Rootless containers; `docker` is aliased to podman and the compat socket is provided.
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."arne" = {
