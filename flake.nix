@@ -16,9 +16,14 @@
     };
 
     sidra.url = "github:wimpysworld/sidra";
+
+    tether = {
+      url = "github:zackb/tether";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, sidra, ... }:
+  outputs = { self, nixpkgs, home-manager, plasma-manager, sidra, tether, ... }:
   let
     system = "x86_64-linux"; # or aarch64-linux
   in
@@ -27,6 +32,7 @@
       inherit system;
       modules = [
         ./hosts/gamix/configuration.nix
+        tether.nixosModules.default
 
         home-manager.nixosModules.home-manager
         {

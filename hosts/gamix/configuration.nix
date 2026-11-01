@@ -133,6 +133,15 @@
     openFirewall = true;
   };
 
+  # Tether: iPhone SMS/iMessage and notifications over Bluetooth (MAP/ANCS).
+  # Bluetooth only: Wi-Fi features and the iOS app are not used, so the
+  # firewall port stays closed. Enables BlueZ with Experimental mode and sets
+  # the adapter class so the iPhone treats this machine as a hands-free device.
+  programs.tether = {
+    enable = true;
+    bluetooth.enable = true;
+  };
+
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
