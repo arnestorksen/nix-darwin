@@ -27,7 +27,10 @@
   # Allow unfree packages (needed for Terraform and other tools)
   nixpkgs.config.allowUnfree = true;
 
-  nix.settings = {
+  # Not `nix.settings`: the determinate module forces `nix.enable = false`,
+  # so nix-darwin ignores `nix.settings` entirely. customSettings is written
+  # to /etc/nix/nix.custom.conf, which Determinate's nix.conf includes.
+  determinateNix.customSettings = {
     trusted-users = [ "@admin" username ];
     extra-substituters = [
       "https://ip-nix-cache-test.s3.eu-north-1.amazonaws.com"
