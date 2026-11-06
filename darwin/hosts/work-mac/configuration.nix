@@ -27,7 +27,15 @@
   # Allow unfree packages (needed for Terraform and other tools)
   nixpkgs.config.allowUnfree = true;
 
-  nix.settings.trusted-users = [ "@admin" username ];
+  nix.settings = {
+    trusted-users = [ "@admin" username ];
+    extra-substituters = [
+      "https://ip-nix-cache-test.s3.eu-north-1.amazonaws.com"
+    ];
+    extra-trusted-public-keys = [
+      "nix-store:nuOQ+CJ8WCmrvs5KoQUwddA4B3KRPKWjHIyEcWa7+I4="
+    ];
+  };
 
   # No nix.linux-builder here: the Linux builder comes from Determinate's
   # native Virtualization.framework one, and nix-darwin's own QEMU-based
