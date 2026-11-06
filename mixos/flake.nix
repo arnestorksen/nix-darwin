@@ -11,7 +11,7 @@
   inputs = {
     # mixos is always consumed from the local clone. This URL only serves
     # locking on the host; in the guest `mixos apply` overrides it with its copy.
-    mixos.url = "git+file:///Users/ars/code/mixos";
+    mixos.url = "git+ssh://git@github.com/tv2norge/mixos.git";
     nixpkgs.follows = "mixos/nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager";

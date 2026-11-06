@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793124281,
-        "narHash": "sha256-KdGTOgYXgMDA/ymTV10yLMt9tOjz9EmTgnTvaD+bhe4=",
+        "lastModified": 1793757180,
+        "narHash": "sha256-gyV7AtCwLnOImcrfSETP4J3Ie96bz19DY47B7m7Y3HM=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "1e3ebeb683d055d1675d3f64e6d2b186cb2ee504",
+        "rev": "b787c48e2ec57a9d098f5c2721882a3bc1e16f97",
         "type": "github"
       },
       "original": {
@@ -27,17 +27,17 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1792767415,
-        "narHash": "sha256-Q2+H6+lNpOWvvbWNCCRR9QXaNYVNsy4G/XVNaVsB75s=",
+        "lastModified": 1793802323,
+        "narHash": "sha256-x3qxB9SFIQ27wlmHD+QMMiXmc+N06P2xtfm3eOoiF24=",
         "ref": "refs/heads/main",
-        "rev": "11d0866d291759e2946a8b3e12df0b794cd604df",
-        "revCount": 69,
+        "rev": "c33d43c2b3a45439ad11e5a27c09287ac772cb67",
+        "revCount": 74,
         "type": "git",
-        "url": "file:///Users/ars/code/mixos"
+        "url": "ssh://git@github.com/tv2norge/mixos.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///Users/ars/code/mixos"
+        "url": "ssh://git@github.com/tv2norge/mixos.git"
       }
     },
     "nixlib": {
