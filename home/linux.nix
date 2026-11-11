@@ -17,6 +17,7 @@
     proton-pass # Proton Pass desktop app
     proton-pass-cli # Proton Pass CLI
     libreoffice-qt # office suite with KDE integration, opens RTF
+    signal-desktop # Signal messenger desktop app
     sidraPkg # Apple Music desktop client, from the sidra flake input (not in nixpkgs)
   ];
 
