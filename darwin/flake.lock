@@ -97,9 +97,7 @@
     },
     "dokken-aws-helper": {
       "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1793964081,
@@ -221,11 +219,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793802323,
-        "narHash": "sha256-x3qxB9SFIQ27wlmHD+QMMiXmc+N06P2xtfm3eOoiF24=",
+        "lastModified": 1794253570,
+        "narHash": "sha256-rMfqp//8rcYIFAxXFCpKhvCqL8RjoaWaRsyqydo3mJE=",
         "ref": "refs/heads/main",
-        "rev": "c33d43c2b3a45439ad11e5a27c09287ac772cb67",
-        "revCount": 74,
+        "rev": "e1442da4353370fa13252be72ca5691a7bf271ac",
+        "revCount": 80,
         "type": "git",
         "url": "ssh://git@github.com/tv2norge/mixos"
       },
@@ -450,6 +448,22 @@
     },
     "nixpkgs_3": {
       "locked": {
+        "lastModified": 1793865203,
+        "narHash": "sha256-/cpdPHaySDIyCgZI6EWngiM6jK3YLUNzv1b7lTzy6Bk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c56a87d8e41ce69bd2af57eb35dcc117a9dfca33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
         "lastModified": 1793826729,
         "narHash": "sha256-D5H7H+qMoTGI/jJtxKP4u7BdjkFnUyhOovTrf3pTOr0=",
         "owner": "NixOS",
@@ -472,7 +486,7 @@
         "home-manager": "home-manager",
         "mixos": "mixos",
         "nix-darwin": "nix-darwin",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_4"
       }
     },
     "systems": {

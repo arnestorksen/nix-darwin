@@ -12,7 +12,7 @@
     # fetched over git+ssh -- this is why the work Mac needs the
     # build-as-user/activate-as-root split (`nix-rebuild`), see README.
     dokken-aws-helper.url = "git+ssh://git@github.com/tv2norge/dokken-aws-helper";
-    dokken-aws-helper.inputs.nixpkgs.follows = "nixpkgs";
+    #dokken-aws-helper.inputs.nixpkgs.follows = "nixpkgs";
     # Pre-built dash0 CLI binaries; the dash0-cli flake itself only exposes a
     # buildGoModule source build, which nothing caches.
     dash0-nur.url = "github:dash0hq/nur";
