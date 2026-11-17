@@ -111,7 +111,7 @@ in
     # MIXOS_FLAKE it quietly builds mixos's own fallback guest instead.
     #
     # The guest flake, in this repo.
-    MIXOS_FLAKE = "${config.home.homeDirectory}/.config/nix-darwin/mixos";
+    MIXOS_FLAKE = "${config.home.homeDirectory}/.config/nix-darwin/mixos-guest";
     # The guest's commit-signing key, installed by `mixos apply` when missing.
     MIXOS_SIGNING_KEY = "op://Private/Mixos signing/private key?ssh-format=openssh";
     # Build the guest against the clone rather than the copy of mixos the CLI

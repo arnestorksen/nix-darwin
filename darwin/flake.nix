@@ -17,9 +17,10 @@
     # buildGoModule source build, which nothing caches.
     dash0-nur.url = "github:dash0hq/nur";
     dash0-nur.inputs.nixpkgs.follows = "nixpkgs";
-    # Work Mac only (see work.nix): the mixos host CLI, from the same local
-    # clone the guest flake in ../mixos locks. Bump with
-    # `nix flake update mixos` after changing bin/mixos there.
+    # Work Mac only (see work.nix): the mixos host CLI. This lock -- not the
+    # guest flake's in ../mixos-guest -- decides which CLI gets installed.
+    # Bump with `nix flake update mixos --refresh` in this directory after
+    # pushing changes to bin/mixos.
     mixos.url = "git+ssh://git@github.com/tv2norge/mixos";
     mixos.inputs.nixpkgs.follows = "nixpkgs";
   };
