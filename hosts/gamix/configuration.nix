@@ -227,6 +227,7 @@
     # Gaming
     lutris
     heroic # Epic Games Store + GOG, native launcher (uses legendary/gogdl)
+    (callPackage ./epic-games-launcher.nix { }) # Epic's official Linux launcher
     mangohud
     protonup-qt
     discord
