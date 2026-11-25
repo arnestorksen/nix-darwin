@@ -249,6 +249,7 @@
     neovim
     simple-scan # Scanning GUI for the Canon PIXMA MG8250 (via sane-pixma)
     keepassxc # KeePass (.kdbx) password manager
+    (callPackage ./cewe-photo.nix { }) # CEWE.no photo books, Windows client via Wine
 
     # Gaming
     lutris
