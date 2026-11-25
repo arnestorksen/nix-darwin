@@ -203,6 +203,31 @@
   # package grants access to the "wheel" group, which arne is already in.
   programs.corectrl.enable = true;
 
+  # NTFS "Data" disk (sda2), mounted at a fixed path on every boot. nofail so
+  # a missing/unplugged drive doesn't block boot; automount defers the mount
+  # until first access.
+  fileSystems."/mnt/data" = {
+    device = "/dev/disk/by-uuid/6A26DB4F26DB1B41";
+    fsType = "ntfs3";
+    options = [
+      "uid=1000" "gid=100"
+      "nofail"
+      "x-systemd.automount"
+      "x-gvfs-show" # show in Dolphin's Places panel
+    ];
+  };
+
+  # Let wheel users mount internal drives (e.g. the NTFS "Data" disk) from the
+  # file manager without being prompted for the login password each time.
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id.indexOf("org.freedesktop.udisks2.filesystem-mount") == 0 &&
+          subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
   # 1Password. These modules (rather than plain home-manager packages) set up
   # the polkit rules and setuid wrapper needed for browser native-messaging
   # and system-auth unlock.
@@ -223,6 +248,7 @@
     protonmail-desktop
     neovim
     simple-scan # Scanning GUI for the Canon PIXMA MG8250 (via sane-pixma)
+    keepassxc # KeePass (.kdbx) password manager
 
     # Gaming
     lutris
