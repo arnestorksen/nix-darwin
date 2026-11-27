@@ -6,6 +6,10 @@
 {
   homebrew = {
     enable = true;
+    # Not in nixpkgs.
+    brews = [
+      "akamai"
+    ];
     casks = [
       "vivaldi"
     ];
