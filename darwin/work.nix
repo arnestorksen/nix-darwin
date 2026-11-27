@@ -119,6 +119,38 @@ in
     MIXOS_REPO = "${config.home.homeDirectory}/code/mixos";
   };
 
+  # Dash0 k9s plugin (Shift-D shows Dash0 metrics for the selected resource).
+  # k9s itself is enabled in ../home/darwin.nix; this only adds the plugins on
+  # the work Mac. https://www.dash0.com/docs/dash0/miscellaneous/tooling/dash0-cli/commands#k9s-plugin
+  programs.k9s.plugins =
+    let
+      common = {
+        shortCut = "Shift-D";
+        description = "Dash0 metrics";
+        command = "dash0";
+        background = false;
+        confirm = false;
+      };
+      watch = kind: target: [
+        "-X" "k8s" kind "watch" "-o" "page" "--pause-on-error"
+        "--context" "$CONTEXT" "-n" "$NAMESPACE" target
+      ];
+    in
+    {
+      dash0-pod-metrics = common // {
+        scopes = [ "pods" ];
+        args = watch "pods" "$NAME";
+      };
+      dash0-container-metrics = common // {
+        scopes = [ "containers" ];
+        args = watch "pods" "$POD";
+      };
+      dash0-workload-metrics = common // {
+        scopes = [ "deployments" "statefulsets" "daemonsets" "replicasets" "jobs" "cronjobs" ];
+        args = watch "$RESOURCE_NAME" "$NAME";
+      };
+    };
+
   # Lima VM that mounts /nix/store read-only, so Linux Nix store binaries can
   # be run directly without Docker. Apple Virtualization.framework + Rosetta,
   # so both aarch64-linux and x86_64-linux binaries work.
