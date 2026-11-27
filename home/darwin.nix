@@ -190,12 +190,18 @@ in
 
   home.sessionVariables = {
     DOCKER_HOST = "unix:///Users/${username}/.config/colima/default/docker.sock";
-    XDG_CONFIG_HOME = "$HOME/.config";
   };
+
+  # XDG_CONFIG_HOME is exported (via xdg.enable), so k9s reads ~/.config/k9s;
+  # without this, home-manager writes k9s files to ~/Library/Application Support.
+  xdg.enable = true;
 
   # Shell configuration -- portable bits (completion, kubectl plugin)
   # come from home/common.nix; only the macOS-specific pieces are added here.
   programs.zsh = {
+    # Keep dotfiles in $HOME (legacy default); silences the stateVersion < 26.05 warning.
+    dotDir = config.home.homeDirectory;
+
     profileExtra = ''
       eval "$(/opt/homebrew/bin/brew shellenv)"
     '';
@@ -208,6 +214,16 @@ in
 
   programs.k9s = {
     enable = true;
+    aliases = {
+      dp = "deployments";
+      sec = "v1/secrets";
+      jo = "jobs";
+      cr = "clusterroles";
+      crb = "clusterrolebindings";
+      ro = "roles";
+      rb = "rolebindings";
+      np = "networkpolicies";
+    };
   };
 
   services.gpg-agent = {
