@@ -8,7 +8,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-    # Work Mac only (see work.nix). dokken-aws-helper is a private TV2 repo
+    # Work Mac only (see home/work.nix). dokken-aws-helper is a private TV2 repo
     # fetched over git+ssh -- this is why the work Mac needs the
     # build-as-user/activate-as-root split (`nix-rebuild`), see README.
     dokken-aws-helper.url = "git+ssh://git@github.com/tv2norge/dokken-aws-helper";
@@ -17,7 +17,7 @@
     # buildGoModule source build, which nothing caches.
     dash0-nur.url = "github:dash0hq/nur";
     dash0-nur.inputs.nixpkgs.follows = "nixpkgs";
-    # Work Mac only (see work.nix): the mixos host CLI. This lock -- not the
+    # Work Mac only (see home/work.nix): the mixos host CLI. This lock -- not the
     # guest flake's in ../mixos-guest -- decides which CLI gets installed.
     # Bump with `nix flake update mixos --refresh` in this directory after
     # pushing changes to bin/mixos.
@@ -41,7 +41,7 @@
             home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = { inherit inputs; hostname = "Mac-TM7WHWRD7G"; username = "ars"; };
             home-manager.users.ars = {
-              imports = [ ../home/darwin.nix ./git-issue-workflow.nix ./work.nix ];
+              imports = [ ../home/darwin.nix ./git-issue-workflow.nix ../home/work.nix ];
             };
           }
         ];

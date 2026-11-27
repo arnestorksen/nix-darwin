@@ -27,7 +27,7 @@ Then rebuild — `nix-rebuild` on the work Mac, or
 ## What's Actually in This Repo
 
 Git identity (name, email, signing key) is set per-machine in `flake.nix` —
-work Mac via `work.nix` (email, SSH signing key), home Mac via
+work Mac via `home/work.nix` (email, SSH signing key), home Mac via
 `programs.git.settings` in `flake.nix` (GPG key ID). Both are already committed to this repo
 and public in git history/commits regardless, so there's nothing extra
 exposed by them being in `flake.nix` too.

@@ -17,14 +17,14 @@ scope — see the Resources links at the bottom.
 | Username | `ars` | `arne` |
 | Platform | `aarch64-darwin` | `x86_64-darwin` |
 | Private inputs | `dokken-aws-helper` (TV2-internal) | none |
-| Git identity | `work.nix` (work email + SSH signing) | `programs.git.settings` (personal GPG signing) |
-| Extra modules | `work.nix` | — |
+| Git identity | `home/work.nix` (work email + SSH signing) | `programs.git.settings` (personal GPG signing) |
+| Extra modules | `home/work.nix` | — |
 
 Both are defined as separate, fully hand-written `darwinConfigurations` blocks
 in `flake.nix` — there's no shared "template" helper function.
 `../home/darwin.nix` (shared home-manager config, imports `../home/common.nix`)
 and each host's `hosts/<host>/configuration.nix` are shared and
-machine-independent; `work.nix` holds everything that is work-Mac-only and is
+machine-independent; `home/work.nix` holds everything that is work-Mac-only and is
 imported by that machine's block alone. Remaining machine-specific bits
 (hostname, username, platform, git identity) are set per-block via
 `specialArgs` and inline home-manager config in `flake.nix`.
@@ -46,7 +46,7 @@ setup, not because the `.pkg` is wrong.)
 
 ## Work Mac (`Mac-TM7WHWRD7G`) specifics
 
-Everything work-specific lives in [`work.nix`](./work.nix), imported by this
+Everything work-specific lives in [`home/work.nix`](../home/work.nix), imported by this
 machine's block in `flake.nix` and by nothing else: work tooling (cloud/k8s
 CLIs, `dash0`, `dokken-aws-helper`), the TV2 git identity and 1Password
 commit signing, `GOPROXY`/`GONOSUMDB`, the `nix-linux` Lima VM, the
@@ -80,7 +80,7 @@ favour of plain inlined values.
   sudo /tmp/nix-darwin-system/sw/bin/darwin-rebuild activate
   ```
   After the first activation, use `nix-rebuild` (a shell function defined in
-  `work.nix`) for all subsequent changes — it does the same
+  `home/work.nix`) for all subsequent changes — it does the same
   build-as-user/activate-as-root split automatically.
 - **Commit signing depends on 1Password's SSH Agent** (Settings → Developer →
   SSH Agent) being enabled, **and on being signed into the right 1Password
@@ -97,7 +97,7 @@ favour of plain inlined values.
 
 ## Home Mac (`arne-mac`) specifics
 
-No private inputs, no `work.nix` — just nix-darwin + home-manager, with git
+No private inputs, no `home/work.nix` — just nix-darwin + home-manager, with git
 identity set inline via `programs.git.settings` in its `flake.nix` block
 (personal GPG signing, not SSH/1Password). First-time bootstrap is the plain
 path, no special procedure needed:
@@ -207,7 +207,7 @@ the default branch itself is a no-op error.
 
 1. Edit configuration files
 2. Apply changes:
-   - Work Mac: `nix-rebuild` (defined in `work.nix`)
+   - Work Mac: `nix-rebuild` (defined in `home/work.nix`)
    - Home Mac: `darwin-rebuild switch --flake ~/.config/nixos-config/darwin#arne-mac`
 
 ### Adding Packages
@@ -259,12 +259,13 @@ darwin/
 │   ├── work-mac/configuration.nix    # Mac-TM7WHWRD7G system config
 │   └── arne-mac/configuration.nix    # arne-mac system config
 ├── git-issue-workflow.nix   # Shared: gi/gia/gd/gpb + the commit-msg hooks they satisfy
-├── work.nix                 # Work Mac only: TV2 tooling, git identity, nix-rebuild, secrets sync
+├── homebrew.nix             # Shared: Homebrew casks (e.g. vivaldi), system-level
 ├── README.md                # This file
 ├── SETUP_GUIDE.md            # Fresh-machine bootstrap runbook (this repo's two machines)
 ├── GITHUB_SETUP.md           # Repo/remote status and cross-machine sync workflow
 └── AGENTS.md / CLAUDE.md     # Instructions for coding agents working in this directory
 
+../home/work.nix            # Work Mac only: TV2 tooling, git identity, nix-rebuild, secrets sync
 ../nvim/                     # Neovim configuration (shared with gamix), used via ../home/common.nix
 │   └── lua/
 │       └── config/          # Lua configuration modules

@@ -1,6 +1,8 @@
 { config, lib, pkgs, username, platform, ... }:
 
 {
+  imports = [ ../../homebrew.nix ];
+
   # System packages kept minimal - user packages go in home-manager
   environment.systemPackages = [ ];
 

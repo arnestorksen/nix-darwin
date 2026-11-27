@@ -143,6 +143,6 @@ darwin-rebuild --list-generations
 ## Getting Help
 
 - Work-Mac-specific wiring (TV2 tooling, git identity, `nix-rebuild`): see
-  [`work.nix`](./work.nix) and [README.md](./README.md#work-mac-mac-tm7whwrd7g-specifics)
+  [`home/work.nix`](../home/work.nix) and [README.md](./README.md#work-mac-mac-tm7whwrd7g-specifics)
 - [Nix Darwin docs](https://github.com/LnL7/nix-darwin)
 - [search.nixos.org](https://search.nixos.org)

@@ -6,7 +6,7 @@ is fine — none of the caveats below apply there.
 
 ## Rebuilding
 
-Always suggest `nix-rebuild` to apply changes — a shell function (defined in `work.nix`, so it
+Always suggest `nix-rebuild` to apply changes — a shell function (defined in `home/work.nix`, so it
 exists on the work Mac only) that builds the flake as the user and then runs
 `sudo darwin-rebuild activate`.
 

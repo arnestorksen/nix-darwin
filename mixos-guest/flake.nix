@@ -3,7 +3,7 @@
 # top-level flake's inputs -- dokken-aws-helper is git+ssh behind the
 # 1Password agent, which the guest has no way to reach.
 #
-# Applied by `mixos apply` (installed by darwin/work.nix), which finds it via
+# Applied by `mixos apply` (installed by home/work.nix), which finds it via
 # MIXOS_FLAKE, exported there too.
 {
   description = "mixos guest for ars, built on mixos";

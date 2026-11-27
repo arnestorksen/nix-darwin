@@ -83,7 +83,7 @@
       };
 
       # The key itself is kept in 1Password on the host and installed by
-      # `mixos apply` (MIXOS_SIGNING_KEY, set in darwin/work.nix). Without it
+      # `mixos apply` (MIXOS_SIGNING_KEY, set in home/work.nix). Without it
       # every commit fails, so say so up front rather than at `git commit`.
       programs.zsh.initContent = lib.mkAfter ''
         if [[ ! -e ~/.ssh/id_ed25519 ]]; then

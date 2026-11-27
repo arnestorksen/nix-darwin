@@ -1,7 +1,7 @@
 { config, lib, pkgs, inputs, ... }:
 
 # Work Mac (Mac-TM7WHWRD7G) only -- imported from flake.nix alongside
-# ../home/darwin.nix, which holds everything shared with the home Mac. Migrated here
+# ./darwin.nix, which holds everything shared with the home Mac. Migrated here
 # from the separate `nix-dokken-dev` flake (~/code/nix-work-env); it had a
 # `tv2.workEnv.*` option surface for reuse by colleagues, which nobody ever
 # took up, so the values are inlined directly now.
@@ -15,7 +15,7 @@ let
 in
 {
   # Work-only tooling. Anything also wanted on the home Mac (python3, uv,
-  # ripgrep, jq, docker, gh, ...) lives in ../home/darwin.nix instead, so this
+  # ripgrep, jq, docker, gh, ...) lives in ./darwin.nix instead, so this
   # list is deliberately just the delta.
   home.packages = with pkgs; [
     # Data tools
@@ -62,7 +62,7 @@ in
     mixos
   ];
 
-  # Work identity + SSH commit signing via 1Password. ../home/darwin.nix leaves
+  # Work identity + SSH commit signing via 1Password. ./darwin.nix leaves
   # programs.git.settings.user unset, so this is the default identity on this
   # machine; the includes below carve out personal repos.
   programs.git.settings = {
@@ -79,7 +79,7 @@ in
 
   # Fall back to personal identity (and OpenPGP signing) in these directories,
   # so work repos sign as TV2 and personal ones don't. Merges with the
-  # idpGitHooks include in git-issue-workflow.nix -- programs.git.includes is
+  # idpGitHooks include in darwin/git-issue-workflow.nix -- programs.git.includes is
   # a list option.
   programs.git.includes = map
     (dir: {
@@ -120,7 +120,7 @@ in
   };
 
   # Dash0 k9s plugin (Shift-D shows Dash0 metrics for the selected resource).
-  # k9s itself is enabled in ../home/darwin.nix; this only adds the plugins on
+  # k9s itself is enabled in ./darwin.nix; this only adds the plugins on
   # the work Mac. https://www.dash0.com/docs/dash0/miscellaneous/tooling/dash0-cli/commands#k9s-plugin
   programs.k9s.plugins =
     let
